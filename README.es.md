@@ -5,12 +5,12 @@ Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores
 *[Read in English](README.md)*
 
 - **Mundo abierto (PvP):** quien te campea, te gankea o te ataca mientras haces misiones. Al verlo cerca, le pone una calavera encima y te avisa en pantalla con los motivos y cuántas veces te ha matado.
-- **Mazmorras / Bandas:** ninjas, gente tóxica, los que abandonan... Te avisa si entran en tu grupo o te invitan.
+- **Mazmorras / Bandas:** ninjas, gente tóxica, los que abandonan... Te avisa si invitas a uno, si uno te invita y si te unes a un grupo donde está.
 
 ## Funciones
 
 - Dos listas con **motivos predeterminados** (Ninja, Needea todo, Abandona el grupo, Campea tu cadáver, Mata a niveles bajos...) y una nota libre.
-- **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si entra en tu grupo o te invita), cómo (aviso en pantalla, chat, icono sobre la placa, marca de banda), icono, sonido, color, duración y cada cuánto se repite.
+- **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si está en tu grupo y en las invitaciones, tuyas o suyas), cómo (aviso en pantalla, chat, icono sobre la placa, marca de banda), icono, sonido, color, duración y cada cuánto se repite.
 - **Aviso en pantalla** que puedes mover y cambiar de tamaño.
 - **Al morir**, te propone añadir al jugador enemigo que parece haberte matado y cuenta las muertes.
 - **Clic derecho** en retratos y nombres del chat para añadir, editar o quitar.
@@ -43,6 +43,7 @@ Valen `/ln`, `/listanegra` y `/blacklist`.
 | `/ln motivos` | Palabras de los motivos |
 | `/ln quitar [pvp o grupo] Nombre` | Quita de una lista (o de las dos) |
 | `/ln buscar Nombre` | Dice si alguien está en tus listas |
+| `/ln comprobar` | Dice quién de tu grupo está en tus listas |
 | `/ln minimapa` | Muestra u oculta el icono del minimapa |
 | `/ln prueba [pvp o grupo]` | Enseña un aviso de ejemplo |
 | `/ln reset` | Vuelve a centrar las ventanas y el aviso |

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+
+- **Dungeons / Raids: alert when you invite someone on the list.** Before, only invites you received alerted.
+- When you join a group, everyone in it who is on the list alerts as soon as you're in (the game doesn't show a group's members before you accept).
+- The "When they invite you" option is now **Invites** and covers both directions.
+- New `/ln check`: shows what the add-on reads from each group member and whether they're on your lists.
+
 ## 1.0.1
 
 - The add-on is now called **Player Blacklist** (it was ListaNegra). Your lists and settings are kept.

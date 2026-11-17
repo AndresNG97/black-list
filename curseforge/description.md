@@ -16,12 +16,12 @@ When you die, Player Blacklist offers to add the enemy player who seems to have 
 
 ### Dungeons / Raids
 
-Ninjas, toxic players, leavers, people who don't do their role... You get warned when one of them **joins your group** or **invites you**, before you waste an hour with them.
+Ninjas, toxic players, leavers, people who don't do their role... You get warned when **you invite** one of them, when one of them **invites you**, and when you **join a group** they're in, before you waste an hour with them.
 
 ## Features
 
 - **Preset reasons** for each list (Ninja, Needs on everything, Leaves the group, Camps your corpse, Kills low levels...) plus a free-text note.
-- **Alerts set up per list:** when (nearby, in your group, invites), how (on-screen alert, chat, nameplate icon, raid marker), icon, sound, color, duration and cooldown.
+- **Alerts set up per list:** when (nearby, in your group, invites either way), how (on-screen alert, chat, nameplate icon, raid marker), icon, sound, color, duration and cooldown.
 - **On-screen alert** you can move and resize.
 - **Right-click** on unit portraits and chat names to add, edit or remove someone.
 - **Tooltip** shows the list and reasons when you mouse over a listed player.
@@ -39,6 +39,7 @@ Ninjas, toxic players, leavers, people who don't do their role... You get warned
 | `/ln group Name toxic ninja note` | Add by name with reasons and a note |
 | `/ln remove Name` | Remove from your lists |
 | `/ln search Name` | Check if someone is on your lists |
+| `/ln check` | See who in your group is on your lists |
 | `/ln test` | Show a sample alert |
 | `/ln help` | Every command |
 

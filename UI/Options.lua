@@ -21,7 +21,7 @@ local function build()
 	desc:SetPoint("TOPLEFT", 16, -64)
 	desc:SetPoint("TOPRIGHT", -16, -64)
 	desc:SetWordWrap(true)
-	desc:SetText(L["Keeps blacklists of players and alerts you when you run into them in the open world, or when someone on your dungeons and raids list joins your group or invites you."])
+	desc:SetText(L["Keeps blacklists of players and alerts you when you run into them in the open world, or when someone on your dungeons and raids list joins your group, invites you or you invite them."])
 
 	local lists = UI.Button(panel, L["Open the lists"], "primary", nil, 30, function() ns.openWindow("pvp") end)
 	lists:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", 0, -16)

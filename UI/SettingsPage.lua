@@ -46,7 +46,7 @@ local WINDOW_SCALES = {
 local WHEN = {
 	{ "nearby", L["When nearby"], L["When their nameplate shows up, you target them or you mouse over them."] },
 	{ "inGroup", L["When in your group"], L["When they join your party or raid, or you join theirs."] },
-	{ "invite", L["When they invite you"], L["When you get a group invite from them."] },
+	{ "invite", L["Invites"], L["When they invite you, or you invite them."] },
 }
 local HOW = {
 	{ "screen", L["On-screen alert"], L["Card in the middle of the screen with their name and reasons."] },

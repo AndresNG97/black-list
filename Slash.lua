@@ -6,7 +6,7 @@ local L = ns.L
 -- Command words in the client's language (the English and Spanish ones always work)
 local W = {
 	alerts = L["alerts"], reasons = L["reasons"], remove = L["remove"], search = L["search"],
-	minimap = L["minimap"], test = L["test"], help = L["help"], group = L["group"],
+	minimap = L["minimap"], test = L["test"], help = L["help"], group = L["group"], check = L["check"],
 }
 
 local function help()
@@ -22,6 +22,7 @@ local function help()
 		{ "/ln " .. W.reasons, L["reason keywords"] },
 		{ "/ln " .. W.remove .. " [pvp|" .. G .. "] " .. L["Name"], L["removes from one list (or both)"] },
 		{ "/ln " .. W.search .. " " .. L["Name"], L["tells you if someone is on your lists"] },
+		{ "/ln " .. W.check, L["checks who in your group is on your lists"] },
 		{ "/ln " .. W.minimap, L["shows or hides the minimap icon"] },
 		{ "/ln " .. W.test .. " [pvp|" .. G .. "]", L["shows a sample alert"] },
 		{ "/ln reset", L["re-centers the windows and the alert"] },
@@ -123,6 +124,7 @@ local COMMANDS = {
 	reasons = presetsCmd, motivos = presetsCmd,
 	remove = removeCmd, delete = removeCmd, quitar = removeCmd, borrar = removeCmd,
 	search = searchCmd, find = searchCmd, buscar = searchCmd, ver = searchCmd,
+	check = function() ns.groupReport() end, comprobar = function() ns.groupReport() end,
 	minimapa = minimapCmd, minimap = minimapCmd,
 	prueba = testCmd, test = testCmd,
 	reset = resetCmd,
