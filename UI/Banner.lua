@@ -1,5 +1,5 @@
--- Aviso en pantalla: tarjeta oscura con franja de color, icono, nombre y motivos.
--- Se puede mover (desbloquear, arrastrar, fijar) y cambiar de tamaño.
+-- On-screen alert: dark card with a color stripe, icon, name and reasons.
+-- Can be moved (unlock, drag, lock) and resized.
 
 local _, ns = ...
 local UI = ns.UI
@@ -10,8 +10,8 @@ UI.Banner = Banner
 
 local f, unlocked
 
--- La posición se guarda en unidades de la pantalla (no de la escala del aviso), para que
--- cambiar el tamaño no lo mueva de sitio
+-- The position is saved in screen units (not the alert's scale), so that
+-- resizing doesn't move it
 local function savePos()
 	local point, _, relPoint, x, y = f:GetPoint(1)
 	local s = f:GetScale()
@@ -24,7 +24,7 @@ local function applyPos()
 	f:ClearAllPoints()
 	local p = ns.settings.alertPos
 	if type(p) == "table" and p.point then
-		local k = p.screen and s or 1 -- posiciones antiguas guardadas sin convertir
+		local k = p.screen and s or 1 -- old positions saved without converting
 		f:SetPoint(p.point, UIParent, p.relPoint or p.point, (p.x or 0) / k, (p.y or 0) / k)
 	else
 		f:SetPoint("TOP", UIParent, "TOP", 0, -140 / s)
@@ -100,7 +100,7 @@ local function get()
 	return f
 end
 
--- id: lista (para el icono, el color y la duración); e: la persona; what: "está cerca"...
+-- id: list (for the icon, color and duration); e: the person; what: "is nearby"...
 function Banner.show(id, e, what, detail)
 	local c = ns.cfg(id)
 	get()
@@ -118,7 +118,7 @@ function Banner.show(id, e, what, detail)
 	f.anim:Play()
 end
 
--- Mover el aviso: queda visible y arrastrable hasta que se vuelva a fijar
+-- Moving the alert: stays visible and draggable until it's locked again
 function Banner.setUnlocked(on)
 	get()
 	unlocked = on and true or false

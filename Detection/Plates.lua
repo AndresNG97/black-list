@@ -1,4 +1,4 @@
--- Placas de nombre: icono propio encima (solo lo ves tú) y marca de banda (la ve tu grupo).
+-- Nameplates: our own icon on top (only you see it) and raid marker (your group sees it).
 
 local _, ns = ...
 local isSecret, safe, plain = ns.isSecret, ns.safe, ns.plain
@@ -7,15 +7,15 @@ local Plates = {}
 ns.Plates = Plates
 
 ---------------------------------------------------------------------------
--- Marca de banda
+-- Raid marker
 ---------------------------------------------------------------------------
--- Si el juego bloquea la marca en combate, se deja de intentar hasta salir de combate
+-- If the game blocks the marker in combat, stop trying until combat ends
 local blockedThisCombat = false
 
 local function canRaidMark(id)
 	if not ns.cfg(id).raidMark then return false end
 	if blockedThisCombat and InCombatLockdown() then return false end
-	if IsInInstance() then return false end -- no pisar las marcas del líder en mazmorras
+	if IsInInstance() then return false end -- don't override the leader's markers in instances
 	if IsInRaid() then return UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") end
 	return true
 end
@@ -28,9 +28,9 @@ function Plates.raidMark(id, unit)
 end
 
 ---------------------------------------------------------------------------
--- Icono sobre la placa
+-- Icon above the nameplate
 ---------------------------------------------------------------------------
-local overlays = {} -- [placa de nombre] = marco con el icono
+local overlays = {} -- [nameplate] = frame with the icon
 
 local function plateFor(unit)
 	if not (C_NamePlate and C_NamePlate.GetNamePlateForUnit) then return end
@@ -40,7 +40,7 @@ local function plateFor(unit)
 	return plate
 end
 
--- Si el juego ya le pinta ese mismo icono de banda, no lo duplicamos
+-- If the game already shows that same raid icon on it, don't duplicate it
 local function updateOverlay(o)
 	o:SetShown(o.unit ~= nil and plain(safe(GetRaidTargetIndex, o.unit)) ~= o.icon)
 end
@@ -55,7 +55,7 @@ function Plates.setIcon(unit, icon)
 		o = frame
 		o:SetSize(34, 34)
 		o:SetPoint("BOTTOM", plate, "TOP", 0, 4)
-		-- Por encima de las placas de otros add-ons (ElvUI, Plater...), que cuelgan de la misma placa
+		-- Above other add-ons' nameplates (ElvUI, Plater...), which hang off the same plate
 		o:SetFrameLevel(plate:GetFrameLevel() + 50)
 		o.tex = o:CreateTexture(nil, "OVERLAY")
 		o.tex:SetAllPoints()
@@ -85,7 +85,7 @@ function Plates.each(fn)
 	end
 end
 
--- Vuelve a pintar todas las placas visibles (sin avisos)
+-- Repaint all visible nameplates (no alerts)
 function Plates.refresh()
 	for _, o in pairs(overlays) do
 		o.unit = nil
@@ -95,10 +95,10 @@ function Plates.refresh()
 end
 
 ---------------------------------------------------------------------------
--- Eventos
+-- Events
 ---------------------------------------------------------------------------
--- Si el juego bloquea la marca de banda: en combate se pausa hasta salir de él; fuera de combate
--- se desactiva en los ajustes (el icono propio sobre la placa sigue funcionando)
+-- If the game blocks the raid marker: in combat, pause until combat ends; out of combat,
+-- turn it off in the settings (our own nameplate icon keeps working)
 local function onForbidden(addon, fn)
 	if addon ~= ns.ADDON or type(fn) ~= "string" or not fn:find("SetRaidTarget") then return end
 	if InCombatLockdown() then

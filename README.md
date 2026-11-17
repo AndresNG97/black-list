@@ -1,4 +1,4 @@
-# ListaNegra — Player Blacklist
+# Player Blacklist
 
 An add-on for **World of Warcraft: Forever** that keeps blacklists of players and warns you when you run into them.
 
@@ -25,9 +25,9 @@ An add-on for **World of Warcraft: Forever** that keeps blacklists of players an
 **From GitHub:**
 
 1. Download the repository (**Code → Download ZIP**) and unzip it.
-2. **Rename the folder to `ListaNegra`.** The game only loads the add-on if the folder has the same name as `ListaNegra.toc`. A GitHub download is called `black-list` or `black-list-main`.
+2. **Rename the folder to `ListaNegra`** (the add-on keeps this folder name). The game only loads the add-on if the folder has the same name as `ListaNegra.toc`. A GitHub download is called `black-list` or `black-list-main`.
 3. Move it to `World of Warcraft\_forever_\Interface\AddOns\`.
-4. Restart the game and enable **ListaNegra** in the AddOns list on the character screen.
+4. Restart the game and enable **Player Blacklist** in the AddOns list on the character screen.
 
 ## Commands
 

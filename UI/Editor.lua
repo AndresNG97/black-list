@@ -1,4 +1,4 @@
--- Ventana de añadir / editar: jugador, lista, motivos (etiquetas) y nota.
+-- Add / edit window: player, list, reasons (tags) and note.
 
 local _, ns = ...
 local UI = ns.UI
@@ -7,7 +7,7 @@ local L = ns.L
 local safe, plain = ns.safe, ns.plain
 
 local W = 520
-local D -- la ventana
+local D -- the window
 local state = {} -- mode, list, key, info, fromKill, gameName, gameRealm, initTags, initNote, loadedName
 
 local function copyTags(t)
@@ -19,20 +19,20 @@ local function copyTags(t)
 end
 
 ---------------------------------------------------------------------------
--- Estado de la ventana
+-- Window state
 ---------------------------------------------------------------------------
 local function currentName()
 	if state.gameName then return state.gameName, state.gameRealm end
 	return ns.splitName(D.nameInput:GetText())
 end
 
--- "Guardar" solo cuando hay a quién guardar
+-- "Save" only when there is someone to save
 local function updateSave()
 	local name = currentName()
 	D.save:SetEnabled(name ~= nil and name ~= "")
 end
 
--- Rellena motivos y nota: los de la entrada si ya existe, si no los iniciales
+-- Fills in reasons and note: the entry's own if it already exists, otherwise the initial ones
 local function loadValues()
 	local tags, note = state.initTags or {}, state.initNote or ""
 	state.loadedName = D.nameInput:GetText()
@@ -50,7 +50,7 @@ local function loadValues()
 			chip:SetSelected(id == state.list and tags[chip.key])
 		end
 	end
-	-- Lo que hayas escrito tú en la nota no se pierde al cambiar de lista
+	-- Whatever you typed in the note is kept when you switch lists
 	local typed = D.noteInput:GetText()
 	local userEdited = state.loadedNote ~= nil and typed ~= state.loadedNote
 	if not userEdited then
@@ -101,12 +101,12 @@ local function save()
 end
 
 ---------------------------------------------------------------------------
--- Construcción
+-- Build
 ---------------------------------------------------------------------------
 local function build()
 	D = UI.Window({ name = "ListaNegraEditor", w = W, h = 430, strata = "FULLSCREEN_DIALOG", save = "editor" })
 
-	-- Jugador: retrato y nombre (si viene del juego) o campo para escribirlo
+	-- Player: portrait and name (if it comes from the game) or a field to type it
 	UI.Section(D, L["Player"], 18, -64)
 	D.who = CreateFrame("Frame", nil, D)
 	D.who:SetPoint("TOPLEFT", 18, -82)
@@ -127,7 +127,7 @@ local function build()
 	D.nameInput:SetScript("OnEnterPressed", function() D.noteInput:SetFocus() end)
 	D.nameInput:SetScript("OnTabPressed", function() D.noteInput:SetFocus() end)
 	D.nameInput:HookScript("OnTextChanged", function() if D.save then updateSave() end end)
-	-- Si escribes el nombre de alguien que ya está, carga sus motivos (si no, no toca lo marcado)
+	-- If you type the name of someone already listed, load their reasons (otherwise leave the checked ones alone)
 	D.nameInput:HookScript("OnEditFocusLost", function()
 		if state.mode ~= "add" or state.gameName then return end
 		local text = D.nameInput:GetText()
@@ -136,7 +136,7 @@ local function build()
 		if n ~= "" and ns.find(state.list, n, r) then loadValues() else state.loadedName = text end
 	end)
 
-	-- Lista
+	-- List
 	UI.Section(D, L["List"], 18, -130)
 	local items = {}
 	for i, id in ipairs(ns.ORDER) do
@@ -145,7 +145,7 @@ local function build()
 	D.listSelect = UI.Segmented(D, items, setList, W - 36, 32)
 	D.listSelect:SetPoint("TOPLEFT", 18, -148)
 
-	-- Motivos
+	-- Reasons
 	UI.Section(D, L["Reasons"], 18, -196)
 	D.chips = {}
 	local chipsH = 0
@@ -159,7 +159,7 @@ local function build()
 		chipsH = math.max(chipsH, UI.flow(D.chips[id], D, 18, -214, W - 36, 6))
 	end
 
-	-- Nota (debajo de las etiquetas, que pueden ocupar varias filas)
+	-- Note (below the tags, which can take up several rows)
 	local noteY = -214 - chipsH - 18
 	UI.Section(D, L["Note"], 18, noteY)
 	D.noteInput = UI.Input(D, W - 36, 30, L["Optional: what happened, where, with whom..."])
@@ -173,7 +173,7 @@ local function build()
 	D:SetHeight(height)
 	D.baseH = height
 
-	-- Botones
+	-- Buttons
 	D.save = UI.Button(D, SAVE or L["Save"], "primary", 120, 30, save)
 	D.save:SetPoint("BOTTOMRIGHT", -18, 18)
 	D.save.tip = L["Saves the reasons and the note (Enter)."]
@@ -249,18 +249,18 @@ function ns.openEditor(opts)
 	if state.mode == "add" and not opts.name then D.nameInput:SetFocus() end
 end
 
--- Usado por el menú de clic derecho, /ln y "te ha matado"
+-- Used by the right-click menu, /ln and the "Looks like they killed you" prompt
 function ns.promptAdd(id, name, realm, note, info, fromKill)
 	ns.openEditor({ mode = "add", list = id, name = name, realm = realm, note = note, info = info, fromKill = fromKill })
 end
 
--- ¿Tu objetivo es un jugador que se puede añadir? (para activar el botón "Añadir objetivo")
+-- Is your target a player that can be added? (to enable the "Add target" button)
 function ns.targetIsAddable()
 	if plain(safe(UnitIsUnit, "target", "player")) then return false end
 	return ns.unitIdentity("target") ~= nil
 end
 
--- Añade a tu objetivo: directamente si ya traes motivos o nota, si no abre la ventana
+-- Adds your target: directly if reasons or a note are passed in, otherwise opens the window
 function ns.addTarget(id, note, tags)
 	if plain(safe(UnitIsUnit, "target", "player")) then
 		ns.say(L["You can't add yourself."])

@@ -1,4 +1,4 @@
--- Clic derecho en retratos y en nombres del chat: añadir, editar o quitar de las listas.
+-- Right-click on portraits and chat names: add to, edit in or remove from the lists.
 
 local _, ns = ...
 local isSecret, safe, plain = ns.isSecret, ns.safe, ns.plain
@@ -9,7 +9,7 @@ local MENU_TAGS = {
 	"MENU_UNIT_COMMUNITIES_GUILD_MEMBER", "MENU_UNIT_GUILD",
 }
 
--- Nombre, reino y datos de la persona del menú (nil si es un PNJ o el juego oculta quién es)
+-- Name, realm and details of the menu's person (nil if it's an NPC or the game hides who it is)
 local function identity(ctx)
 	if type(ctx) ~= "table" then return end
 	local unit = ctx.unit

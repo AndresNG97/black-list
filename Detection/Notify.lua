@@ -1,5 +1,5 @@
--- Avisos: sonido, aviso en pantalla y chat según los ajustes de cada lista,
--- y la espera entre avisos de la misma persona.
+-- Alerts: sound, on-screen alert and chat according to each list's settings,
+-- and the wait between alerts for the same person.
 
 local _, ns = ...
 
@@ -14,7 +14,7 @@ function ns.playSound(key)
 	if id then pcall(PlaySound, id, "Master") end
 end
 
--- Un aviso por persona cada "cooldown" segundos (ajuste de cada lista)
+-- One alert per person every "cooldown" seconds (per-list setting)
 local lastAlert = {}
 
 function ns.cooled(id, k)
@@ -25,12 +25,12 @@ function ns.cooled(id, k)
 	return true
 end
 
--- Recién añadido: no avisar en ese mismo momento
+-- Just added: don't alert right away
 function ns.snooze(id, k)
 	if id and k then lastAlert[id .. ":" .. k] = GetTime() end
 end
 
--- what: texto ya traducido ("está cerca", "está en tu grupo"...)
+-- what: already translated text ("is nearby", "is in your group"...)
 function ns.notify(id, e, what)
 	local c = ns.cfg(id)
 	local detail = ns.detail(e)
@@ -44,7 +44,7 @@ function ns.notify(id, e, what)
 	end
 end
 
--- Aviso de ejemplo con los ajustes de una lista
+-- Sample alert using a list's settings
 function ns.test(id)
 	id = id or "pvp"
 	local sample = {

@@ -1,4 +1,4 @@
--- Ventana principal: cabecera, pestañas (Mundo abierto, Mazmorras / Bandas, Avisos) y páginas.
+-- Main window: header, tabs (Open world, Dungeons / Raids, Alerts) and pages.
 
 local _, ns = ...
 local UI = ns.UI
@@ -65,10 +65,10 @@ function ns.toggleWindow()
 	if W and W:IsShown() then W:Hide() else ns.openWindow() end
 end
 
--- Botón en el compartimento de add-ons del minimapa
+-- Button in the minimap's add-on compartment
 function ListaNegra_OnCompartmentClick() ns.toggleWindow() end
 
--- Ver a alguien cambia "visto hace...": refresco agrupado, como mucho uno cada medio segundo
+-- Seeing someone changes "seen %s": batched refresh, at most once every half second
 local pending = false
 local function refreshSoon()
 	if pending or not (W and W:IsShown()) or current == "avisos" then return end

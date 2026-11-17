@@ -1,16 +1,16 @@
--- Utilidades compartidas: mensajes, lecturas seguras, eventos del juego, avisos internos y arranque.
--- WoW Forever usa el motor de Midnight: algunas lecturas pueden devolver valores "secretos"
--- (identidad oculta en instancias, BG o arenas). Todo lo que lee una unidad pasa por safe/plain.
+-- Shared utilities: messages, safe reads, game events, internal notices and startup.
+-- WoW Forever uses the Midnight engine: some reads can return "secret" values
+-- (identity hidden in instances, BGs or arenas). Everything that reads a unit goes through safe/plain.
 
 local ADDON, ns = ...
 ns.ADDON = ADDON
 ns.UI = {}
 
 ---------------------------------------------------------------------------
--- Mensajes en el chat: siempre con el prefijo del add-on y sin repetir el mismo
--- mensaje varias veces seguidas
+-- Chat messages: always with the add-on prefix, and the same message is not
+-- repeated several times in a row
 ---------------------------------------------------------------------------
-local REPEAT_GAP = 3 -- segundos
+local REPEAT_GAP = 3 -- seconds
 local lastText, lastTime = nil, 0
 
 function ns.say(fmt, ...)
@@ -22,7 +22,7 @@ function ns.say(fmt, ...)
 end
 
 ---------------------------------------------------------------------------
--- Lecturas seguras
+-- Safe reads
 ---------------------------------------------------------------------------
 function ns.isSecret(v) return issecretvalue ~= nil and issecretvalue(v) or false end
 
@@ -31,17 +31,17 @@ function ns.safe(fn, ...)
 	return pcall(fn, ...)
 end
 
--- plain(safe(fn, ...)): el valor si la lectura funcionó y no es secreto; si no, nil
+-- plain(safe(fn, ...)): the value if the read worked and it isn't secret; otherwise nil
 function ns.plain(ok, v)
 	if ok and not ns.isSecret(v) then return v end
 end
 
--- Llama a fn sin que un error corte a los demás (el error se muestra igualmente)
+-- Calls fn so that an error doesn't stop the others (the error is still shown)
 local call = securecallfunction or function(fn, ...) return fn(...) end
 ns.call = call
 
 ---------------------------------------------------------------------------
--- Eventos del juego: un único marco, varios módulos por evento
+-- Game events: a single frame, several modules per event
 ---------------------------------------------------------------------------
 local bus = CreateFrame("Frame")
 local gameHandlers = {}
@@ -66,10 +66,10 @@ bus:SetScript("OnEvent", function(_, event, ...)
 end)
 
 ---------------------------------------------------------------------------
--- Avisos internos entre módulos
---   LISTS_CHANGED      se añadió, editó o quitó a alguien
---   SETTINGS_CHANGED   cambió un ajuste
---   SIGHTING           se ha visto a alguien de las listas (cambian "visto", nivel...)
+-- Internal notices between modules
+--   LISTS_CHANGED      someone was added, edited or removed
+--   SETTINGS_CHANGED   a setting changed
+--   SIGHTING           someone on the lists was seen ("seen", level... change)
 ---------------------------------------------------------------------------
 local listeners = {}
 
@@ -85,7 +85,7 @@ function ns.fire(name, ...)
 end
 
 ---------------------------------------------------------------------------
--- Arranque: cada módulo registra su inicio con ns.onLoad (en el orden del .toc)
+-- Startup: each module registers its init with ns.onLoad (in .toc order)
 ---------------------------------------------------------------------------
 local inits = {}
 function ns.onLoad(fn) inits[#inits + 1] = fn end

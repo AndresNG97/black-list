@@ -1,9 +1,9 @@
--- Gente cerca: se comprueba al aparecer su placa de nombre, al seleccionarla o al pasarle el ratón.
+-- People nearby: checked when their nameplate appears, when targeted or on mouseover.
 
 local _, ns = ...
 local Plates = ns.Plates
 
--- Icono de la placa: manda la lista de mundo abierto si está en las dos
+-- Nameplate icon: the open world list wins if they're on both
 local function paintPlate(unit, hits)
 	if not unit:find("^nameplate") then return end
 	for _, id in ipairs(ns.ORDER) do
@@ -14,8 +14,8 @@ local function paintPlate(unit, hits)
 	end
 end
 
--- quiet: solo pintar el icono de la placa (al refrescar tras cambiar listas o ajustes);
--- no cuenta como "visto", no marca y no avisa
+-- quiet: only paint the nameplate icon (when refreshing after list or settings changes);
+-- doesn't count as "seen", doesn't mark and doesn't alert
 function ns.checkUnit(unit, quiet)
 	local name, realm, guid = ns.unitIdentity(unit)
 	if not name then return end
@@ -26,7 +26,7 @@ function ns.checkUnit(unit, quiet)
 
 	for id, h in pairs(hits) do ns.recordSighting(id, h.entry, name, unit) end
 
-	-- Marca de banda: la primera lista que la tenga activada
+	-- Raid marker: the first list that has it turned on
 	for _, id in ipairs(ns.ORDER) do
 		if hits[id] and ns.cfg(id).raidMark then
 			Plates.raidMark(id, unit)
@@ -34,7 +34,7 @@ function ns.checkUnit(unit, quiet)
 		end
 	end
 
-	-- Un solo aviso aunque esté en las dos listas: el aviso cuenta como dado en ambas
+	-- Only one alert even if they're on both lists: the alert counts as given on both
 	for _, id in ipairs(ns.ORDER) do
 		local h = hits[id]
 		if h and ns.cfg(id).nearby and ns.cooled(id, h.key) then

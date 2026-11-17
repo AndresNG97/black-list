@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1
+
+- The add-on is now called **Player Blacklist** (it was ListaNegra). Your lists and settings are kept.
+- Code comments in English.
+
 ## 1.0.0
 
 First public release.

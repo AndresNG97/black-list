@@ -1,11 +1,11 @@
--- Datos guardados (ListaNegraDB): valores por defecto, migraciones y acceso a los ajustes.
--- Cambios de formato: añadir campos con valor por defecto (fill) o migrar los datos antiguos.
+-- Saved data (ListaNegraDB): defaults, migrations and access to the settings.
+-- Format changes: add fields with a default value (fill) or migrate the old data.
 
 local _, ns = ...
 
--- Ajustes por lista: pvp = mundo abierto, grupo = mazmorras y bandas
+-- Per-list settings: pvp = open world, grupo = dungeons and raids
 local ALERT_DEFAULTS = {
-	pvp = { -- inGroup/invite no se usan en mundo abierto (ver groupAlerts en Data.lua)
+	pvp = { -- inGroup/invite are not used in the open world (see groupAlerts in Data.lua)
 		nearby = true, inGroup = false, invite = false, screen = true, chat = true,
 		plateIcon = true, raidMark = true, icon = 8, sound = "RAID_WARNING", color = "rojo",
 		duration = 5, cooldown = 120,
@@ -18,13 +18,13 @@ local ALERT_DEFAULTS = {
 }
 
 local GENERAL_DEFAULTS = {
-	killerPrompt = true, -- al morir, ofrecer añadir a quien parece haberte matado
-	alertScale = 1,      -- tamaño del aviso en pantalla
-	windowScale = 1,     -- tamaño de las ventanas (se reduce solo si no caben en pantalla)
-	sort = "seen",       -- orden de las listas
+	killerPrompt = true, -- on death, offer to add whoever seems to have killed you
+	alertScale = 1,      -- size of the on-screen alert
+	windowScale = 1,     -- size of the windows (shrinks automatically if they don't fit on screen)
+	sort = "seen",       -- sort order of the lists
 }
 
--- Versión 0.1: ajustes todos juntos -> ajustes por lista
+-- Version 0.1: all settings together -> per-list settings
 local function migrateV1(s)
 	if s.alerts or s.alertPvp == nil then return end
 	s.alerts = { pvp = {}, grupo = {} }
@@ -67,13 +67,13 @@ local function initDB()
 	end
 	if type(s.minimap) ~= "table" then s.minimap = {} end
 	fill(s.minimap, { angle = 200, hide = false })
-	if type(s.windows) ~= "table" then s.windows = {} end -- posiciones de las ventanas
+	if type(s.windows) ~= "table" then s.windows = {} end -- window positions
 
 	ns.db, ns.settings = db, s
 end
 
--- Ajustes de avisos de una lista
+-- Alert settings of a list
 function ns.cfg(id) return ns.settings.alerts[id] end
 
--- Primero de todos los inicios: el resto de módulos ya encuentra ns.db y ns.settings
+-- First of all the inits: the other modules can then find ns.db and ns.settings
 ns.onLoad(initDB)

@@ -1,8 +1,8 @@
--- Las listas: buscar, añadir, quitar y registrar cuándo se ve a alguien.
+-- The lists: find, add, remove and record when someone is seen.
 
 local _, ns = ...
 
--- Índice por GUID (sigue encontrando a la persona aunque escribieras mal el reino)
+-- Index by GUID (still finds the person even if you misspelled the realm)
 local guidIndex = {}
 local function rebuildIndex()
 	for _, id in ipairs(ns.ORDER) do
@@ -26,7 +26,7 @@ function ns.find(id, name, realm, guid)
 	end
 end
 
--- { pvp = { entry, key }, grupo = { entry, key } } o nil si no está en ninguna lista
+-- { pvp = { entry, key }, grupo = { entry, key } } or nil if not on any list
 function ns.lookup(name, realm, guid)
 	local hits
 	for _, id in ipairs(ns.ORDER) do
@@ -50,8 +50,8 @@ function ns.changed()
 	ns.fire("LISTS_CHANGED")
 end
 
--- opts: reason (nota), tags ({clave = true}), info (datos de la unidad), quiet,
--- exact (la nota y los motivos sustituyen a los anteriores en vez de sumarse)
+-- opts: reason (note), tags ({key = true}), info (unit data), quiet,
+-- exact (the note and reasons replace the previous ones instead of being added)
 function ns.add(id, name, realm, opts)
 	opts = opts or {}
 	if not ns.LISTS[id] or type(name) ~= "string" or name == "" then return end
@@ -94,7 +94,7 @@ function ns.remove(id, k)
 	ns.say(ns.L["%s removed from %s."], ns.coloredName(e), ns.listTag(id))
 end
 
--- Pasa a alguien a la otra lista con todos sus datos
+-- Moves someone to the other list with all their data
 function ns.move(from, to, k)
 	local e = ns.db.lists[from][k]
 	if not e or ns.db.lists[to][k] then return end
@@ -111,11 +111,11 @@ function ns.addKill(e)
 	ns.changed()
 end
 
--- Se ha visto a la persona: actualiza nombre, clase, nivel, zona...
+-- The person was seen: updates name, class, level, zone...
 function ns.recordSighting(id, e, name, unit)
 	local cd = ns.cfg(id).cooldown or 120
 	if not e.lastSeen or time() - e.lastSeen > cd then e.seen = (e.seen or 0) + 1 end
-	e.name = name -- con las mayúsculas reales
+	e.name = name -- with the real capitalization
 	local info = ns.unitInfo(unit)
 	local newGuid = info.guid and info.guid ~= e.guid
 	for f, v in pairs(info) do e[f] = v end
@@ -125,8 +125,8 @@ function ns.recordSighting(id, e, name, unit)
 	ns.fire("SIGHTING")
 end
 
--- Datos de la 0.3 o anteriores: las claves se calculaban sin pasar a minúscula las letras
--- acentuadas. Se recalculan; si dos entradas acaban en la misma clave, se fusionan.
+-- Data from 0.3 or earlier: keys were computed without lowercasing accented
+-- letters. They are recomputed; if two entries end up with the same key, they are merged.
 local function merge(into, e)
 	into.kills = (into.kills or 0) + (e.kills or 0)
 	into.seen = (into.seen or 0) + (e.seen or 0)

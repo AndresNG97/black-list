@@ -1,5 +1,5 @@
--- Nombres de jugador e identidad de unidades.
--- La clave de una persona es "nombre-reino" en minúsculas, con el reino sin espacios.
+-- Player names and unit identity.
+-- A person's key is "name-realm" in lowercase, with the realm without spaces.
 
 local _, ns = ...
 local isSecret, safe, plain = ns.isSecret, ns.safe, ns.plain
@@ -15,15 +15,15 @@ function ns.normRealm(realm)
 	return (realm:gsub("[%s%-']", ""))
 end
 
--- "Nombre-Reino" -> "Nombre", "Reino"
+-- "Name-Realm" -> "Name", "Realm"
 function ns.splitName(full)
 	full = strtrim(full or "")
 	local name, realm = full:match("^([^%-]+)%-(.+)$")
 	return name or full, realm
 end
 
--- string.lower/upper solo cambian letras ASCII; esto también pasa a minúscula las acentuadas
--- (Á É Í Ó Ú Ñ Ü...: en UTF-8 son \195 + un byte de 128 a 158; la minúscula es ese byte + 32)
+-- string.lower/upper only change ASCII letters; this also lowercases accented letters
+-- (Á É Í Ó Ú Ñ Ü...: in UTF-8 they are \195 + a byte from 128 to 158; the lowercase is that byte + 32)
 local function lowerUTF8(s)
 	return (s:lower():gsub("\195([\128-\158])", function(c) return "\195" .. string.char(c:byte() + 32) end))
 end
@@ -42,7 +42,7 @@ function ns.key(name, realm)
 	return lowerUTF8(name .. "-" .. ns.normRealm(realm))
 end
 
--- Nombre para mostrar: sin reino si es el tuyo
+-- Display name: without the realm if it is yours
 function ns.fullName(e)
 	if e.realm and e.realm ~= ns.normRealm(nil) then return e.name .. "-" .. e.realm end
 	return e.name
@@ -52,7 +52,7 @@ function ns.isMe(name, realm)
 	return name == UnitName("player") and ns.normRealm(realm) == ns.normRealm(nil)
 end
 
--- Identidad de una unidad jugador: nombre, reino, GUID (nil si no es jugador o el juego la oculta)
+-- Identity of a player unit: name, realm, GUID (nil if it isn't a player or the game hides it)
 local UnitNameFn = UnitNameUnmodified or UnitName
 function ns.unitIdentity(unit)
 	if not plain(safe(UnitIsPlayer, unit)) then return end
@@ -69,7 +69,7 @@ function ns.unitIdentity(unit)
 	return name, realm, guid
 end
 
--- Datos que guardamos de la persona cuando la vemos
+-- Data we save about the person when we see them
 function ns.unitInfo(unit)
 	local info = {}
 	local ok, _, class = pcall(UnitClass, unit)

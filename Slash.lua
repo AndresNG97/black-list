@@ -1,9 +1,9 @@
--- Comandos /ln, /blacklist y /listanegra. "/ln help" (o "/ln ayuda") los lista todos.
+-- Commands /ln, /blacklist and /listanegra. "/ln help" (or "/ln ayuda") lists them all.
 
 local _, ns = ...
 local L = ns.L
 
--- Palabras de los comandos en el idioma del cliente (las inglesas y las españolas funcionan siempre)
+-- Command words in the client's language (the English and Spanish ones always work)
 local W = {
 	alerts = L["alerts"], reasons = L["reasons"], remove = L["remove"], search = L["search"],
 	minimap = L["minimap"], test = L["test"], help = L["help"], group = L["group"],
@@ -27,12 +27,12 @@ local function help()
 		{ "/ln reset", L["re-centers the windows and the alert"] },
 	}
 	for _, l in ipairs(lines) do
-		-- "||" muestra una barra vertical en el chat
+		-- "||" shows a vertical bar in the chat
 		print(("  |cffffd100%s|r  %s"):format((l[1]:gsub("|", "||")), l[2]))
 	end
 end
 
--- Palabras iniciales que son motivos -> etiquetas; el resto es la nota
+-- Leading words that are reasons -> tags; the rest is the note
 local function parseTags(id, text)
 	local tags, rest = {}, text or ""
 	while true do

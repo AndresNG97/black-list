@@ -4,7 +4,7 @@
 
 1. Sign in at https://authors.curseforge.com and click **Create Project** → World of Warcraft → Addons.
 2. Fill in the form with `curseforge/project.md` and paste `curseforge/description.md` as the description.
-3. Upload `ListaNegra-1.0.0.zip`. The zip must contain one folder called `ListaNegra` with `ListaNegra.toc` inside.
+3. Upload `PlayerBlacklist-<version>.zip`. The zip must contain one folder called `ListaNegra` with `ListaNegra.toc` inside.
    Pick the WoW: Forever game version and paste the 1.0.0 changelog.
 4. Wait for CurseForge moderation to approve the project (usually a day or two).
 

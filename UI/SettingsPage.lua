@@ -1,5 +1,5 @@
--- Página de ajustes: una tarjeta por lista (mundo abierto / mazmorras y bandas) y otra general.
--- Las opciones que dependen de otra se atenúan cuando esa está apagada.
+-- Settings page: one card per list (open world / dungeons and raids) and a general one.
+-- Options that depend on another one are dimmed when that one is off.
 
 local _, ns = ...
 local UI = ns.UI
@@ -9,7 +9,7 @@ local L = ns.L
 local Page = {}
 UI.SettingsPage = Page
 
--- Controles a refrescar; enabledIf (opcional) decide si el control está activo
+-- Controls to refresh; enabledIf (optional) decides whether the control is enabled
 local controls = {}
 local function track(c, enabledIf)
 	c.enabledIf = enabledIf
@@ -20,7 +20,7 @@ end
 local function changed() ns.fire("SETTINGS_CHANGED") end
 
 ---------------------------------------------------------------------------
--- Opciones
+-- Options
 ---------------------------------------------------------------------------
 local ICONS, SOUNDS, COLORS = {}, {}, {}
 for i = 1, 8 do ICONS[i] = { value = i, text = ns.icon(i, 14) .. "  " .. ns.ICON_NAMES[i] } end
@@ -56,7 +56,7 @@ local HOW = {
 }
 
 ---------------------------------------------------------------------------
--- Tarjeta de una lista
+-- List card
 ---------------------------------------------------------------------------
 local CARD_W, PAD = 356, 16
 local INNER = CARD_W - PAD * 2
@@ -116,7 +116,7 @@ local function listCard(parent, id, x)
 	if groupAlerts then
 		for _, opt in ipairs(WHEN) do toggle(opt) end
 	else
-		-- Mundo abierto: solo "al verlo cerca"; el hueco de las otras dos filas explica por qué
+		-- Open world: only "When nearby"; the space of the other two rows explains why
 		toggle(WHEN[1])
 		local note = UI.text(card, 12, C.faint)
 		note:SetPoint("TOPLEFT", PAD, y - 4)
@@ -147,7 +147,7 @@ local function listCard(parent, id, x)
 end
 
 ---------------------------------------------------------------------------
--- Tarjeta general
+-- General card
 ---------------------------------------------------------------------------
 local function generalCard(parent)
 	local S = function() return ns.settings end

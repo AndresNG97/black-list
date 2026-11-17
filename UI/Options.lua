@@ -1,4 +1,4 @@
--- Entrada en Opciones → AddOns del juego: resumen y accesos a la ventana del add-on.
+-- Entry in the game's Options → AddOns: summary and shortcuts to the add-on window.
 
 local _, ns = ...
 local UI = ns.UI
@@ -29,7 +29,7 @@ local function build()
 	alerts:SetPoint("LEFT", lists, "RIGHT", 8, 0)
 
 	local help = UI.text(panel, 13, C.muted)
-	-- Bajo los botones (que miden 30 y están 16 por debajo de la descripción)
+	-- Below the buttons (which are 30 tall and sit 16 below the description)
 	help:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", 0, -66)
 	help:SetPoint("TOPRIGHT", desc, "BOTTOMRIGHT", 0, -66)
 	help:SetWordWrap(true)

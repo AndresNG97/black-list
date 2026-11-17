@@ -1,5 +1,5 @@
--- Botón en el borde del minimapa (clic: listas, clic derecho: avisos, arrastrar: mover).
--- Mismo aspecto y colocación que los botones de LibDBIcon, sin depender de librerías.
+-- Button on the edge of the minimap (click: lists, right-click: alerts, drag: move).
+-- Same look and placement as LibDBIcon buttons, without depending on any library.
 
 local _, ns = ...
 local btn
@@ -10,7 +10,7 @@ local function place()
 	local x, y = math.cos(angle), math.sin(angle)
 	local shape = GetMinimapShape and GetMinimapShape() or "ROUND"
 	if shape == "SQUARE" then
-		-- En un minimapa cuadrado, lleva el botón hasta el borde
+		-- On a square minimap, push the button out to the edge
 		local d = math.sqrt(2)
 		x = math.max(-1, math.min(x * d, 1))
 		y = math.max(-1, math.min(y * d, 1))

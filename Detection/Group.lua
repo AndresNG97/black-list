@@ -1,5 +1,5 @@
--- Grupo e invitaciones: aviso cuando alguien de una lista con groupAlerts (Mazmorras / Bandas)
--- entra en tu grupo o te invita. La lista de mundo abierto no avisa aquí: son enemigos.
+-- Group and invites: alert when someone on a list with groupAlerts (Dungeons / Raids)
+-- joins your group or invites you. The open world list doesn't alert here: they're enemies.
 
 local _, ns = ...
 local isSecret, safe, plain = ns.isSecret, ns.safe, ns.plain
@@ -9,7 +9,7 @@ for _, id in ipairs(ns.ORDER) do
 	if ns.LISTS[id].groupAlerts then GROUP_ORDER[#GROUP_ORDER + 1] = id end
 end
 
-local alerted = {} -- [clave] = true mientras siga en el grupo
+local alerted = {} -- [key] = true while they're still in the group
 local unreadable = false
 
 local function checkGroup()
@@ -41,7 +41,7 @@ local function checkGroup()
 				end
 			end
 		elseif plain(safe(UnitExists, unit)) and not plain(safe(UnitIsUnit, unit, "player")) then
-			unreadable = true -- nombre aún sin cargar u oculto: se reintenta
+			unreadable = true -- name not loaded yet or hidden: retry
 		end
 	end
 	for k in pairs(alerted) do

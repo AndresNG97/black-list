@@ -1,4 +1,4 @@
--- Página de una lista: buscador, orden, botones de añadir y filas con desplazamiento suave.
+-- List page: search box, sort order, add buttons and smooth-scrolling rows.
 
 local _, ns = ...
 local UI = ns.UI
@@ -10,7 +10,7 @@ UI.ListPage = Page
 
 local listId, filter = "pvp", ""
 local ROW_H = 58
-local NAME_MAX = 280 -- ancho máximo del nombre; lo que sobre se recorta con "..."
+local NAME_MAX = 280 -- max name width; anything longer is cut off with "..."
 
 local SORTS = {
 	{ value = "seen", text = L["Recently seen"] },
@@ -40,7 +40,7 @@ local function entries()
 end
 
 ---------------------------------------------------------------------------
--- Acciones de una fila
+-- Row actions
 ---------------------------------------------------------------------------
 local function other(id) return id == "pvp" and "grupo" or "pvp" end
 
@@ -85,7 +85,7 @@ local function rowTooltip(row)
 end
 
 ---------------------------------------------------------------------------
--- Filas
+-- Rows
 ---------------------------------------------------------------------------
 local function setHover(row, on)
 	UI.setColors(row, on and C.hover or C.panel)
@@ -106,7 +106,7 @@ local function buildRow(row)
 	row.icon:SetPoint("LEFT", 16, 0)
 	UI.round(row.icon)
 
-	-- Derecha: cuándo se le vio y muertes (anchos fijos para que no bailen)
+	-- Right: when they were seen and kills (fixed widths so they don't jump around)
 	row.seen = UI.text(row, 12, C.faint)
 	row.seen:SetPoint("TOPRIGHT", -44, -12)
 	row.seen:SetWidth(120)
@@ -116,7 +116,7 @@ local function buildRow(row)
 	row.kills:SetWidth(120)
 	row.kills:SetJustifyH("RIGHT")
 
-	-- Izquierda: nombre, datos y motivos; nunca se meten bajo la columna derecha
+	-- Left: name, details and reasons; they never run under the right column
 	row.name = UI.text(row, 15, nil, true)
 	row.name:SetPoint("TOPLEFT", 60, -11)
 	row.meta = UI.text(row, 12, C.muted)
@@ -182,7 +182,7 @@ local function initRow(row, data)
 end
 
 ---------------------------------------------------------------------------
--- Página
+-- Page
 ---------------------------------------------------------------------------
 local function updateAddTarget()
 	if not Page.addTarget then return end
@@ -229,7 +229,7 @@ function Page.build(parent)
 	end
 	Page.box = box
 
-	-- Lista vacía
+	-- Empty list
 	local empty = CreateFrame("Frame", nil, parent)
 	empty:SetSize(420, 150)
 	empty:SetPoint("CENTER", box, "CENTER", 0, 20)
@@ -257,7 +257,7 @@ function Page.refresh(id)
 	local list = entries()
 	local dp = CreateDataProvider()
 	for _, it in ipairs(list) do dp:Insert(it) end
-	-- Al cambiar de lista se empieza arriba; si no, se conserva el desplazamiento
+	-- Switching lists starts at the top; otherwise the scroll position is kept
 	local retain = not switched and ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition or nil
 	Page.box:SetDataProvider(dp, retain)
 	Page.sort.refresh()

@@ -1,13 +1,13 @@
--- Componentes reutilizables: ventana, botones, interruptores, desplegables, campos de texto,
--- pestañas, selector segmentado, etiquetas de motivo y diálogo de confirmación.
--- Todos tienen estado normal, encima, pulsado y desactivado, y aceptan un tooltip (.tip).
+-- Reusable components: window, buttons, toggles, dropdowns, text fields,
+-- tabs, segmented selector, reason chips and confirmation dialog.
+-- All have normal, hover, pressed and disabled states, and accept a tooltip (.tip).
 
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local L = ns.L
 
--- Tooltip del control si tiene .tip (y .tipTitle opcional). Sin título, el texto hace de título.
+-- Control tooltip if it has .tip (and optional .tipTitle). Without a title, the text is used as the title.
 local function showTip(self, fallbackTitle)
 	if not self.tip then return end
 	local title = self.tipTitle or fallbackTitle
@@ -15,7 +15,7 @@ local function showTip(self, fallbackTitle)
 end
 
 ---------------------------------------------------------------------------
--- Botón
+-- Button
 ---------------------------------------------------------------------------
 local KINDS = {
 	primary   = { bg = C.accent, hi = C.accentHi, down = { 0.78, 0.22, 0.24, 1 }, border = C.none, text = { 1, 1, 1, 1 } },
@@ -25,7 +25,7 @@ local KINDS = {
 		down = { 0.898, 0.282, 0.302, 0.36 }, border = { 0.898, 0.282, 0.302, 0.55 }, text = C.accentHi },
 }
 
--- w: ancho fijo o nil (se ajusta al texto)
+-- w: fixed width or nil (fits the text)
 function UI.Button(parent, text, kind, w, h, onClick)
 	local k = KINDS[kind or "secondary"]
 	local b = UI.panel(parent, k.bg, k.border, "Button")
@@ -73,7 +73,7 @@ function UI.Button(parent, text, kind, w, h, onClick)
 	return b
 end
 
--- Botón pequeño con un aspa (cerrar, quitar, borrar texto)
+-- Small button with a cross (close, remove, clear text)
 function UI.CloseButton(parent, size, tip, onClick, hoverColor)
 	local b = CreateFrame("Button", nil, parent)
 	b:SetSize(size, size)
@@ -106,7 +106,7 @@ function UI.CloseButton(parent, size, tip, onClick, hoverColor)
 end
 
 ---------------------------------------------------------------------------
--- Interruptor (fila con texto a la izquierda y el interruptor a la derecha)
+-- Toggle (row with text on the left and the switch on the right)
 ---------------------------------------------------------------------------
 function UI.Toggle(parent, text, tip, get, set, width)
 	local row = CreateFrame("Button", nil, parent)
@@ -166,14 +166,14 @@ function UI.Toggle(parent, text, tip, get, set, width)
 end
 
 ---------------------------------------------------------------------------
--- Desplegable: el menú del juego anclado bajo el botón, con nuestro estilo.
+-- Dropdown: the game's menu anchored below the button, with our style.
 -- options: { { value = ..., text = ... }, ... }
 ---------------------------------------------------------------------------
 function UI.Dropdown(parent, text, options, get, set, width, buttonWidth)
 	local row = CreateFrame("Frame", nil, parent)
 	row:SetSize(width or 320, 26)
 
-	-- "DropdownButton" se encarga de abrir y cerrar el menú; si no existiera, botón normal
+	-- "DropdownButton" handles opening and closing the menu; if it doesn't exist, a plain button
 	local okDD, dd = pcall(CreateFrame, "DropdownButton", nil, row)
 	local b = okDD and dd or CreateFrame("Button", nil, row)
 	UI.skin(b, C.field, C.borderHi)
@@ -256,7 +256,7 @@ function UI.Dropdown(parent, text, options, get, set, width, buttonWidth)
 end
 
 ---------------------------------------------------------------------------
--- Campo de texto con texto de ayuda y, opcionalmente, botón para borrarlo
+-- Text field with placeholder text and, optionally, a button to clear it
 ---------------------------------------------------------------------------
 function UI.Input(parent, w, h, placeholder, withClear)
 	local e = UI.panel(parent, C.field, C.borderHi, "EditBox")
@@ -293,7 +293,7 @@ function UI.Input(parent, w, h, placeholder, withClear)
 end
 
 ---------------------------------------------------------------------------
--- Pestañas con subrayado
+-- Underlined tabs
 -- items: { { value = ..., text = ..., tip = ... }, ... }
 ---------------------------------------------------------------------------
 function UI.Tabs(parent, items, onSelect)
@@ -364,7 +364,7 @@ function UI.Tabs(parent, items, onSelect)
 end
 
 ---------------------------------------------------------------------------
--- Selector segmentado (varias opciones en una barra; una activa)
+-- Segmented selector (several options in one bar; one active)
 -- items: { { value, text, rgb }, ... }
 ---------------------------------------------------------------------------
 function UI.Segmented(parent, items, onSelect, w, h)
@@ -401,7 +401,7 @@ function UI.Segmented(parent, items, onSelect, w, h)
 		end)
 		box.buttons[i] = b
 	end
-	-- locked: solo se ve la opción activa (al editar)
+	-- locked: only the active option is shown (when editing)
 	function box:Select(value, locked)
 		for _, b in ipairs(self.buttons) do
 			local on = b.item.value == value
@@ -420,7 +420,7 @@ function UI.Segmented(parent, items, onSelect, w, h)
 end
 
 ---------------------------------------------------------------------------
--- Etiqueta de motivo que se marca y desmarca
+-- Reason chip that can be toggled on and off
 ---------------------------------------------------------------------------
 function UI.Chip(parent, text, rgb)
 	local c = UI.panel(parent, C.panel, C.borderHi, "Button")
@@ -455,7 +455,7 @@ function UI.Chip(parent, text, rgb)
 	return c
 end
 
--- Coloca elementos en filas que se parten al llegar al ancho máximo. Devuelve el alto usado.
+-- Lays out items in rows that wrap at the max width. Returns the height used.
 function UI.flow(items, parent, x, y, maxW, gap)
 	local cx, cy, rowH = x, y, 0
 	for _, it in ipairs(items) do
@@ -472,9 +472,9 @@ function UI.flow(items, parent, x, y, maxW, gap)
 end
 
 ---------------------------------------------------------------------------
--- Ventanas
---   · Escape cierra solo la de arriba (las otras salen de UISpecialFrames mientras tanto)
---   · Guardan su posición (opts.save) y se encogen solas si no caben en pantalla
+-- Windows
+--   · Escape closes only the top one (the others are taken out of UISpecialFrames meanwhile)
+--   · They save their position (opts.save) and shrink on their own if they don't fit on screen
 ---------------------------------------------------------------------------
 local escStack, ours = {}, {}
 
@@ -494,7 +494,7 @@ end
 
 local windows = {}
 
--- Coloca la ventana en su posición guardada (en unidades de pantalla) o en el centro
+-- Places the window at its saved position (in screen units) or in the center
 local function place(f)
 	f:ClearAllPoints()
 	local saved = f.saveKey and ns.settings.windows[f.saveKey]
@@ -522,7 +522,7 @@ function UI.fitWindows()
 	for _, f in ipairs(windows) do fit(f) end
 end
 
--- opts: name, w, h, title, strata, save (clave para guardar la posición)
+-- opts: name, w, h, title, strata, save (key to save the position under)
 function UI.Window(opts)
 	local f = UI.skin(CreateFrame("Frame", opts.name, UIParent), C.bg, C.borderHi)
 	f.baseW, f.baseH = opts.w, opts.h
@@ -547,7 +547,7 @@ function UI.Window(opts)
 	end)
 	f:HookScript("OnHide", function(self)
 		unstack(self)
-		-- Al pulsar Escape el juego está recorriendo UISpecialFrames: no tocarla hasta el siguiente fotograma
+		-- When Escape is pressed the game is iterating UISpecialFrames: don't touch it until the next frame
 		C_Timer.After(0, syncEscape)
 	end)
 
@@ -567,7 +567,7 @@ function UI.Window(opts)
 	head:SetScript("OnDragStop", function()
 		f:StopMovingOrSizing()
 		if opts.save then
-			-- En unidades de pantalla: cambiar el tamaño de la ventana no la mueve de sitio
+			-- In screen units: resizing the window doesn't move it
 			local point, _, relPoint, x, y = f:GetPoint(1)
 			local s = f:GetScale()
 			ns.settings.windows[opts.save] = { point = point, relPoint = relPoint, x = x * s, y = y * s }
@@ -580,7 +580,7 @@ function UI.Window(opts)
 	UI.raidIcon(f.icon, 8)
 	f.close = UI.CloseButton(head, 26, L["Close (Esc)"], function() f:Hide() end)
 	f.close:SetPoint("RIGHT", -12, 0)
-	-- Título y subtítulo: anclados por la izquierda y la derecha a la misma altura
+	-- Title and subtitle: anchored left and right at the same height
 	f.title = UI.text(head, 16, C.text, true)
 	f.title:SetText(opts.title or "")
 	f.subtitle = UI.text(head, 12, C.muted)
@@ -602,7 +602,7 @@ function UI.Window(opts)
 	return f
 end
 
--- Vuelve a poner las ventanas en el centro (por si alguna quedó fuera de la pantalla)
+-- Puts the windows back in the center (in case one ended up off screen)
 function UI.resetWindows()
 	wipe(ns.settings.windows)
 	for _, f in ipairs(windows) do
@@ -611,7 +611,7 @@ function UI.resetWindows()
 	end
 end
 
--- Título pequeño de sección
+-- Small section title
 function UI.Section(parent, text, x, y)
 	local fs = UI.text(parent, 12, C.faint, true)
 	fs:SetPoint("TOPLEFT", x, y)
@@ -620,7 +620,7 @@ function UI.Section(parent, text, x, y)
 end
 
 ---------------------------------------------------------------------------
--- Confirmación
+-- Confirmation
 ---------------------------------------------------------------------------
 local confirm
 function UI.confirm(title, text, yesText, onYes)

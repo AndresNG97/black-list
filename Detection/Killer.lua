@@ -1,16 +1,16 @@
--- ¿Quién me ha matado?
--- WoW Forever no deja a los add-ons leer el registro de combate, así que el asesino se deduce:
--- el jugador enemigo que te tenía en el objetivo en los últimos segundos antes de morir.
--- Solo trabaja en combate (un sondeo por segundo) y reutiliza las tablas de sospechosos.
+-- Who killed me?
+-- WoW Forever doesn't let add-ons read the combat log, so the killer is guessed:
+-- the enemy player who had you targeted in the last seconds before you died.
+-- Only works in combat (one scan per second) and reuses the suspect tables.
 
 local _, ns = ...
 local L = ns.L
 local safe, plain = ns.safe, ns.plain
 
-local WINDOW = 20 -- segundos
-local suspects = {} -- [clave] = { name, realm, info, t, strong }
+local WINDOW = 20 -- seconds
+local suspects = {} -- [key] = { name, realm, info, t, strong }
 
--- strong: te tenía en el objetivo. Tu propio objetivo enemigo cuenta como sospechoso débil.
+-- strong: had you targeted. Your own enemy target counts as a weak suspect.
 local function note(unit)
 	if not plain(safe(UnitCanAttack, "player", unit)) then return end
 	local name, realm = ns.unitIdentity(unit)
@@ -20,7 +20,7 @@ local function note(unit)
 	local k = ns.key(name, realm)
 	local s, now = suspects[k], GetTime()
 	if s then
-		-- No rebajar a "débil" a quien hace poco te tenía en el objetivo
+		-- Don't downgrade to "weak" someone who had you targeted recently
 		if s.strong and not strong and now - s.t < WINDOW then return end
 		s.t, s.strong = now, strong
 		return

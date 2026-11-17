@@ -1,9 +1,9 @@
--- Tema visual: colores, tipografías, fondos planos con borde de 1 píxel real, iconos de clase.
+-- Visual theme: colors, fonts, flat backgrounds with a true 1-pixel border, class icons.
 
 local _, ns = ...
 local UI = ns.UI
 
--- Contraste sobre el fondo de los paneles (~#17181d): text ~15:1, muted ~7:1, faint ~4.6:1
+-- Contrast against the panel background (~#17181d): text ~15:1, muted ~7:1, faint ~4.6:1
 UI.C = {
 	bg       = { 0.055, 0.059, 0.071, 0.97 },
 	panel    = { 0.090, 0.094, 0.114, 1 },
@@ -23,8 +23,8 @@ UI.C = {
 UI.HEX = { muted = "a3a8b8", faint = "808594", accent = "e5484d" }
 
 ---------------------------------------------------------------------------
--- Tipografías: las del idioma del cliente (así los nombres en cirílico, coreano o chino
--- se ven bien). Texto: fuente del chat (Arial Narrow en español). Títulos: fuente estándar.
+-- Fonts: the ones for the client's language (so Cyrillic, Korean or Chinese names
+-- display correctly). Body text: chat font (Arial Narrow on English/Spanish clients). Titles: standard font.
 ---------------------------------------------------------------------------
 local fonts = {}
 
@@ -57,13 +57,13 @@ function UI.text(parent, size, color, head, layer)
 	return fs
 end
 
--- Ancho real del texto aunque el FontString esté limitado
+-- Real text width even when the FontString is constrained
 function UI.textWidth(fs)
 	return fs.GetUnboundedStringWidth and fs:GetUnboundedStringWidth() or fs:GetStringWidth()
 end
 
 ---------------------------------------------------------------------------
--- Líneas de 1 píxel físico: se recalculan al cambiar la escala de la interfaz o de la ventana
+-- 1-physical-pixel lines: recalculated when the UI scale or window size changes
 ---------------------------------------------------------------------------
 local pixelLines = setmetatable({}, { __mode = "k" })
 
@@ -73,7 +73,7 @@ local function onePixel(region)
 		local _, h = GetPhysicalScreenSize()
 		factor = 768 / h
 	end
-	-- La escala efectiva de una textura es la de su marco
+	-- A texture's effective scale is that of its frame
 	return factor / math.max(region:GetParent():GetEffectiveScale(), 0.01)
 end
 
@@ -97,7 +97,7 @@ function UI.refreshPixels()
 end
 
 ---------------------------------------------------------------------------
--- Fondo plano con borde (sin plantillas de Blizzard)
+-- Flat background with border (no Blizzard templates)
 ---------------------------------------------------------------------------
 local EDGES = {
 	{ "TOPLEFT", "TOPRIGHT", true }, { "BOTTOMLEFT", "BOTTOMRIGHT", true },
@@ -133,11 +133,11 @@ function UI.panel(parent, bg, border, kind)
 end
 
 ---------------------------------------------------------------------------
--- Formas e iconos
+-- Shapes and icons
 ---------------------------------------------------------------------------
 local MASK = "Interface\\CHARACTERFRAME\\TempPortraitAlphaMask"
 
--- Recorta una textura en círculo
+-- Crops a texture into a circle
 function UI.round(tex)
 	local m = tex:GetParent():CreateMaskTexture()
 	m:SetTexture(MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
@@ -146,7 +146,7 @@ function UI.round(tex)
 	return m
 end
 
--- Aspa dibujada con dos líneas (no depende de que la fuente tenga el carácter ×)
+-- Cross drawn with two lines (doesn't depend on the font having the × character)
 function UI.cross(parent, size, color)
 	local lines = {}
 	local h = size / 2
@@ -190,7 +190,7 @@ function UI.listRGB(id)
 	return { ns.hexToRGB(ns.LISTS[id].hex) }
 end
 
--- Tooltip estándar: título blanco y descripción gris clara con salto de línea
+-- Standard tooltip: white title and light gray wrapped description
 function UI.tip(owner, title, text, anchor)
 	GameTooltip:SetOwner(owner, anchor or "ANCHOR_RIGHT")
 	GameTooltip:AddLine(title, 1, 1, 1)

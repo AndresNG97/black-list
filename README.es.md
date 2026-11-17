@@ -1,4 +1,4 @@
-# ListaNegra — Lista negra de jugadores
+# Player Blacklist (Lista Negra)
 
 Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores y te avisa cuando te los cruzas.
 
@@ -27,7 +27,7 @@ Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores
 1. Descarga el repositorio (**Code → Download ZIP**) y descomprímelo.
 2. **Cambia el nombre de la carpeta a `ListaNegra`.** El juego solo carga el add-on si la carpeta se llama igual que el archivo `ListaNegra.toc`; al descargarlo de GitHub se llama `black-list` o `black-list-main`.
 3. Muévela a `World of Warcraft\_forever_\Interface\AddOns\`.
-4. Cierra y vuelve a abrir el juego, y activa **ListaNegra** en la lista de AddOns de la pantalla de personajes.
+4. Cierra y vuelve a abrir el juego, y activa **Player Blacklist** en la lista de AddOns de la pantalla de personajes.
 
 ## Comandos
 

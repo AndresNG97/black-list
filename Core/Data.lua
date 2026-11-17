@@ -1,13 +1,13 @@
--- Datos fijos: listas, motivos predeterminados, iconos, sonidos y colores.
+-- Fixed data: lists, preset reasons, icons, sounds and colors.
 
 local _, ns = ...
 local L = ns.L
 
 ---------------------------------------------------------------------------
--- Listas
+-- Lists
 ---------------------------------------------------------------------------
--- groupAlerts: si la lista avisa cuando alguien entra en tu grupo o te invita.
--- En mundo abierto son enemigos: no tiene sentido, solo se avisa al verlos cerca.
+-- groupAlerts: whether the list alerts when someone joins your group or invites you.
+-- In the open world they are enemies: that makes no sense, you only get alerted when they are nearby.
 ns.LISTS = {
 	pvp   = { short = L["PvP"],   label = L["Open world"],      hex = "e5484d", groupAlerts = false },
 	grupo = { short = L["Group"], label = L["Dungeons / Raids"], hex = "f5a524", groupAlerts = true },
@@ -22,8 +22,8 @@ local ALIAS = {
 function ns.listId(word) return type(word) == "string" and ALIAS[word:lower()] or nil end
 
 ---------------------------------------------------------------------------
--- Motivos predeterminados (se marcan en la ventana o se escriben en /ln por su clave).
--- La clave se guarda en los datos: no cambiarla sin migrar.
+-- Preset reasons (checked in the window or typed in /ln by their keyword).
+-- The key is stored in the saved data: don't change it without a migration.
 ---------------------------------------------------------------------------
 ns.PRESETS = {
 	grupo = {
@@ -49,7 +49,7 @@ ns.PRESETS = {
 	},
 }
 
--- Clave de motivo a partir de una palabra escrita (acepta tildes y mayúsculas)
+-- Reason key from a typed word (accepts accents and capital letters)
 local UNACCENT = {
 	["á"] = "a", ["é"] = "e", ["í"] = "i", ["ó"] = "o", ["ú"] = "u",
 	["Á"] = "a", ["É"] = "e", ["Í"] = "i", ["Ó"] = "o", ["Ú"] = "u",
@@ -62,11 +62,11 @@ function ns.presetKey(id, word)
 	end
 end
 
--- Palabra para escribir el motivo en /ln: la inglesa, o la clave española en clientes en español
+-- Word to type the reason in /ln: the English one, or the Spanish key on Spanish clients
 function ns.presetWord(p) return ns.SPANISH and p.key or p.word end
 
 ---------------------------------------------------------------------------
--- Opciones de los avisos (las claves se guardan en los ajustes)
+-- Alert options (the keys are stored in the settings)
 ---------------------------------------------------------------------------
 ns.ICON_NAMES = {
 	L["Star"], L["Circle"], L["Diamond"], L["Triangle"], L["Moon"], L["Square"], L["Cross"], L["Skull"],

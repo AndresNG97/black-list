@@ -1,4 +1,4 @@
--- Texto para el chat, los avisos y las ventanas.
+-- Text for the chat, the alerts and the windows.
 
 local _, ns = ...
 local L = ns.L
@@ -27,7 +27,7 @@ end
 local FACTION = { Alliance = "|cff4ea8ff" .. L["Alliance"] .. "|r", Horde = "|cffe5484d" .. L["Horde"] .. "|r" }
 function ns.factionText(f) return f and (FACTION[f] or f) end
 
--- Nombres de los motivos marcados, en el orden de la lista de motivos
+-- Names of the checked reasons, in the order of the reason list
 function ns.tagNames(e)
 	local out = {}
 	if type(e.tags) ~= "table" then return out end
@@ -39,7 +39,7 @@ function ns.tagNames(e)
 	return out
 end
 
--- "Ninja, Tóxico · nota"
+-- "Ninja, Toxic / insults · note"
 function ns.reasonText(e)
 	local parts = {}
 	local tags = ns.tagNames(e)
@@ -52,7 +52,7 @@ function ns.killsText(n)
 	return (n == 1 and L["killed you %d time"] or L["killed you %d times"]):format(n)
 end
 
--- motivos + "te ha matado N veces"
+-- reasons + "killed you N times"
 function ns.detail(e)
 	local parts = {}
 	local r = ns.reasonText(e)

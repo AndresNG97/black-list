@@ -1,4 +1,4 @@
--- Tooltip del jugador: si está en tus listas, añade en qué lista está y por qué.
+-- Player tooltip: if they're on your lists, adds which list and why.
 
 local _, ns = ...
 local isSecret = ns.isSecret
