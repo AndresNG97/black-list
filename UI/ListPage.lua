@@ -3,18 +3,20 @@
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
+local L = ns.L
 
 local Page = {}
 UI.ListPage = Page
 
 local listId, filter = "pvp", ""
 local ROW_H = 58
+local NAME_MAX = 280 -- ancho máximo del nombre; lo que sobre se recorta con "..."
 
 local SORTS = {
-	{ value = "seen", text = "Visto hace menos" },
-	{ value = "added", text = "Añadido hace menos" },
-	{ value = "kills", text = "Más muertes" },
-	{ value = "name", text = "Nombre (A-Z)" },
+	{ value = "seen", text = L["Visto hace menos"] },
+	{ value = "added", text = L["Añadido hace menos"] },
+	{ value = "kills", text = L["Más muertes"] },
+	{ value = "name", text = L["Nombre (A-Z)"] },
 }
 local SORTERS = {
 	seen = function(a, b) return (a.e.lastSeen or a.e.added or 0) > (b.e.lastSeen or b.e.added or 0) end,
@@ -43,18 +45,8 @@ end
 local function other(id) return id == "pvp" and "grupo" or "pvp" end
 
 local function confirmRemove(data)
-	UI.confirm("Quitar de la lista", ("¿Quitar a %s de %s?"):format(ns.coloredName(data.e), ns.listTag(data.list)), "Quitar",
+	UI.confirm(L["Quitar de la lista"], L["¿Quitar a %s de %s?"]:format(ns.coloredName(data.e), ns.listTag(data.list)), L["Quitar"],
 		function() ns.remove(data.list, data.k) end)
-end
-
-local function moveTo(data, to)
-	local e = data.e
-	local copy = {}
-	for f, v in pairs(e) do copy[f] = v end
-	ns.db.lists[to][data.k] = copy
-	ns.db.lists[data.list][data.k] = nil
-	ns.changed()
-	ns.say("%s movido a %s.", ns.coloredName(e), ns.listTag(to))
 end
 
 local function rowMenu(row)
@@ -62,38 +54,44 @@ local function rowMenu(row)
 	if not (data and MenuUtil and MenuUtil.CreateContextMenu) then return end
 	MenuUtil.CreateContextMenu(row, function(_, root)
 		root:CreateTitle(ns.fullName(data.e))
-		root:CreateButton("Editar motivos y nota", function() ns.openEditor({ mode = "edit", list = data.list, key = data.k }) end)
+		root:CreateButton(L["Editar motivos y nota"], function() ns.openEditor({ mode = "edit", list = data.list, key = data.k }) end)
 		local to = other(data.list)
 		if not ns.entry(to, data.k) then
-			root:CreateButton(("Mover a %s"):format(ns.LISTS[to].label), function() moveTo(data, to) end)
+			root:CreateButton(L["Mover a %s"]:format(ns.LISTS[to].label), function() ns.move(data.list, to, data.k) end)
 		end
 		root:CreateDivider()
-		root:CreateButton("|cffe5484dQuitar de la lista|r", function() confirmRemove(data) end)
+		root:CreateButton("|cffe5484d" .. L["Quitar de la lista"] .. "|r", function() confirmRemove(data) end)
 	end)
 end
 
 local function rowTooltip(row)
 	local e = row.data and row.data.e
 	if not e then return end
+	local m = C.muted
 	GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
 	GameTooltip:AddLine(ns.coloredName(e))
 	local reason = ns.reasonText(e)
 	if reason ~= "" then GameTooltip:AddLine(reason, 1, 1, 1, true) end
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine("Añadido", date("%d/%m/%Y", e.added or time()), 0.6, 0.62, 0.68, 1, 1, 1)
-	GameTooltip:AddDoubleLine("Visto", ns.ago(e.lastSeen) .. (e.lastZone and (" en " .. e.lastZone) or ""), 0.6, 0.62, 0.68, 1, 1, 1)
-	GameTooltip:AddDoubleLine("Veces visto", tostring(e.seen or 0), 0.6, 0.62, 0.68, 1, 1, 1)
+	GameTooltip:AddDoubleLine(L["Añadido"], date("%d/%m/%Y", e.added or time()), m[1], m[2], m[3], 1, 1, 1)
+	GameTooltip:AddDoubleLine(L["Visto"], ns.ago(e.lastSeen) .. (e.lastZone and (" · " .. e.lastZone) or ""), m[1], m[2], m[3], 1, 1, 1)
+	GameTooltip:AddDoubleLine(L["Veces visto"], tostring(e.seen or 0), m[1], m[2], m[3], 1, 1, 1)
 	if (e.kills or 0) > 0 then
-		GameTooltip:AddDoubleLine("Te ha matado", ("%d (la última %s)"):format(e.kills, ns.ago(e.lastKill)), 0.6, 0.62, 0.68, 1, 0.35, 0.35)
+		GameTooltip:AddDoubleLine(L["Te ha matado"], L["%d (la última %s)"]:format(e.kills, ns.ago(e.lastKill)), m[1], m[2], m[3], 1, 0.35, 0.35)
 	end
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine("Clic: editar · Clic derecho: más opciones", 0.5, 0.75, 1)
+	GameTooltip:AddLine(L["Clic: editar · Clic derecho: más opciones"], 0.5, 0.75, 1)
 	GameTooltip:Show()
 end
 
 ---------------------------------------------------------------------------
 -- Filas
 ---------------------------------------------------------------------------
+local function setHover(row, on)
+	UI.setColors(row, on and C.hover or C.panel)
+	row.del:SetShown(on)
+end
+
 local function buildRow(row)
 	UI.skin(row, C.panel, C.border)
 	row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -108,34 +106,35 @@ local function buildRow(row)
 	row.icon:SetPoint("LEFT", 16, 0)
 	UI.round(row.icon)
 
+	-- Derecha: cuándo se le vio y muertes (anchos fijos para que no bailen)
+	row.seen = UI.text(row, 12, C.faint)
+	row.seen:SetPoint("TOPRIGHT", -44, -12)
+	row.seen:SetWidth(120)
+	row.seen:SetJustifyH("RIGHT")
+	row.kills = UI.text(row, 13, { 1, 0.42, 0.42, 1 })
+	row.kills:SetPoint("BOTTOMRIGHT", -44, 11)
+	row.kills:SetWidth(120)
+	row.kills:SetJustifyH("RIGHT")
+
+	-- Izquierda: nombre, datos y motivos; nunca se meten bajo la columna derecha
 	row.name = UI.text(row, 15, nil, true)
 	row.name:SetPoint("TOPLEFT", 60, -11)
 	row.meta = UI.text(row, 12, C.muted)
 	row.meta:SetPoint("LEFT", row.name, "RIGHT", 10, -1)
+	row.meta:SetPoint("RIGHT", row.seen, "LEFT", -10, 0)
 	row.reason = UI.text(row, 13, C.muted)
 	row.reason:SetPoint("BOTTOMLEFT", 60, 11)
-	row.reason:SetPoint("RIGHT", -150, 0)
+	row.reason:SetPoint("RIGHT", row.kills, "LEFT", -10, 0)
 
-	row.seen = UI.text(row, 12, C.faint)
-	row.seen:SetPoint("TOPRIGHT", -44, -12)
-	row.seen:SetJustifyH("RIGHT")
-	row.kills = UI.text(row, 13, { 1, 0.4, 0.4, 1 })
-	row.kills:SetPoint("BOTTOMRIGHT", -44, 11)
-	row.kills:SetJustifyH("RIGHT")
-
-	row.del = UI.IconButton(row, "×", 24, "Quitar de la lista", function() confirmRemove(row.data) end, C.accentHi)
+	row.del = UI.CloseButton(row, 24, L["Quitar de la lista"], function() confirmRemove(row.data) end, C.accentHi)
 	row.del:SetPoint("RIGHT", -10, 0)
-	row.del:SetAlpha(0)
+	row.del:Hide()
 	row.onChildLeave = function(self)
-		if not self:IsMouseOver() then
-			UI.setColors(self, C.panel)
-			self.del:SetAlpha(0)
-		end
+		if not self:IsMouseOver() then setHover(self, false) end
 	end
 
 	row:SetScript("OnEnter", function(self)
-		UI.setColors(self, C.hover)
-		self.del:SetAlpha(1)
+		setHover(self, true)
 		rowTooltip(self)
 	end)
 	row:SetScript("OnLeave", function(self)
@@ -162,9 +161,10 @@ local function initRow(row, data)
 	row.stripe:SetColorTexture(ns.hexToRGB(hex))
 	UI.setClassIcon(row.icon, e.class)
 	row.name:SetText(ns.coloredName(e))
+	row.name:SetWidth(math.min(math.ceil(UI.textWidth(row.name)) + 2, NAME_MAX))
 
 	local meta = {}
-	if e.level then meta[#meta + 1] = "Nv " .. e.level end
+	if e.level then meta[#meta + 1] = L["Nv %d"]:format(e.level) end
 	if e.race then meta[#meta + 1] = e.race end
 	if e.faction then meta[#meta + 1] = ns.factionText(e.faction) end
 	row.meta:SetText(table.concat(meta, " · "))
@@ -173,19 +173,27 @@ local function initRow(row, data)
 	local tags = ns.tagNames(e)
 	if #tags > 0 then parts[#parts + 1] = ("|cff%s%s|r"):format(hex, table.concat(tags, " · ")) end
 	if e.reason and e.reason ~= "" then parts[#parts + 1] = e.reason end
-	row.reason:SetText(#parts > 0 and table.concat(parts, "   ") or ("|cff%sSin motivo: haz clic para añadirlo|r"):format(UI.HEX.faint))
+	row.reason:SetText(#parts > 0 and table.concat(parts, "   ")
+		or ("|cff%s%s|r"):format(UI.HEX.faint, L["Sin motivo: haz clic para añadirlo"]))
 
-	row.seen:SetText(e.lastSeen and ("visto " .. ns.ago(e.lastSeen)) or "sin ver todavía")
+	row.seen:SetText(e.lastSeen and L["visto %s"]:format(ns.ago(e.lastSeen)) or L["sin ver todavía"])
 	row.kills:SetText((e.kills or 0) > 0 and (ns.icon(8, 13) .. " " .. e.kills) or "")
-	UI.setColors(row, C.panel)
-	row.del:SetAlpha(0)
+	setHover(row, row:IsMouseOver())
 end
 
 ---------------------------------------------------------------------------
 -- Página
 ---------------------------------------------------------------------------
+local function updateAddTarget()
+	if not Page.addTarget then return end
+	local ok = ns.targetIsAddable()
+	Page.addTarget:SetEnabled(ok)
+	Page.addTarget.tip = ok and L["Añade al jugador que tienes seleccionado."]
+		or L["Selecciona a un jugador (que no seas tú) para poder añadirlo."]
+end
+
 function Page.build(parent)
-	Page.search = UI.Input(parent, 250, 30, "Buscar por nombre o motivo...")
+	Page.search = UI.Input(parent, 240, 30, L["Buscar por nombre o motivo..."], true)
 	Page.search:SetPoint("TOPLEFT", 16, -14)
 	Page.search:HookScript("OnTextChanged", function(self)
 		filter = self:GetText() or ""
@@ -195,13 +203,15 @@ function Page.build(parent)
 	Page.sort = UI.Dropdown(parent, nil, SORTS, function() return ns.settings.sort end,
 		function(v) ns.settings.sort = v; Page.refresh() end, 170, 170)
 	Page.sort:SetPoint("LEFT", Page.search, "RIGHT", 8, 0)
+	Page.sort.tipTitle = L["Ordenar"]
+	Page.sort.tip = L["Cambia el orden de la lista."]
 
-	Page.addTarget = UI.Button(parent, "+ Añadir objetivo", "primary", nil, 30, function() ns.addTarget(listId) end)
+	Page.addTarget = UI.Button(parent, L["+ Añadir objetivo"], "primary", nil, 30, function() ns.addTarget(listId) end)
 	Page.addTarget:SetPoint("TOPRIGHT", -16, -14)
-	Page.addTarget.tip = "Añade al jugador que tienes seleccionado."
-	Page.addName = UI.Button(parent, "Añadir por nombre", "secondary", nil, 30,
+	Page.addName = UI.Button(parent, L["Añadir por nombre"], "secondary", nil, 30,
 		function() ns.openEditor({ mode = "add", list = listId }) end)
 	Page.addName:SetPoint("RIGHT", Page.addTarget, "LEFT", -8, 0)
+	Page.addName.tip = L["Escribe el nombre de alguien que no tienes delante."]
 
 	local box = CreateFrame("Frame", nil, parent, "WowScrollBoxList")
 	box:SetPoint("TOPLEFT", 16, -58)
@@ -221,12 +231,12 @@ function Page.build(parent)
 
 	-- Lista vacía
 	local empty = CreateFrame("Frame", nil, parent)
-	empty:SetSize(420, 140)
+	empty:SetSize(420, 150)
 	empty:SetPoint("CENTER", box, "CENTER", 0, 20)
 	empty.icon = empty:CreateTexture(nil, "ARTWORK")
 	empty.icon:SetSize(56, 56)
 	empty.icon:SetPoint("TOP")
-	empty.icon:SetAlpha(0.25)
+	empty.icon:SetAlpha(0.3)
 	empty.title = UI.text(empty, 16, C.text, true)
 	empty.title:SetPoint("TOP", empty.icon, "BOTTOM", 0, -12)
 	empty.hint = UI.text(empty, 13, C.muted)
@@ -235,29 +245,38 @@ function Page.build(parent)
 	empty.hint:SetWordWrap(true)
 	empty.hint:SetJustifyH("CENTER")
 	Page.empty = empty
+
+	parent:HookScript("OnShow", updateAddTarget)
+	updateAddTarget()
 end
 
 function Page.refresh(id)
-	if id then listId = id end
 	if not Page.box then return end
+	local switched = id and id ~= listId
+	if id then listId = id end
 	local list = entries()
 	local dp = CreateDataProvider()
 	for _, it in ipairs(list) do dp:Insert(it) end
-	Page.box:SetDataProvider(dp, ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition)
+	-- Al cambiar de lista se empieza arriba; si no, se conserva el desplazamiento
+	local retain = not switched and ScrollBoxConstants and ScrollBoxConstants.RetainScrollPosition or nil
+	Page.box:SetDataProvider(dp, retain)
 	Page.sort.refresh()
+	updateAddTarget()
 
 	local empty = Page.empty
 	empty:SetShown(#list == 0)
 	if #list == 0 then
 		UI.raidIcon(empty.icon, ns.cfg(listId).icon or 8)
 		if filter ~= "" then
-			empty.title:SetText("Sin resultados")
-			empty.hint:SetText(("Nadie en %s coincide con «%s»."):format(ns.LISTS[listId].label, filter))
+			empty.title:SetText(L["Sin resultados"])
+			empty.hint:SetText(L["Nadie en %s coincide con «%s»."]:format(ns.LISTS[listId].label, filter))
 		else
-			empty.title:SetText("Todavía no hay nadie aquí")
-			empty.hint:SetText("Selecciona a un jugador y pulsa «Añadir objetivo», haz clic derecho en su retrato o en su nombre del chat, o usa «Añadir por nombre».")
+			empty.title:SetText(L["Todavía no hay nadie aquí"])
+			empty.hint:SetText(L["Selecciona a un jugador y pulsa «Añadir objetivo», haz clic derecho en su retrato o en su nombre del chat, o usa «Añadir por nombre»."])
 		end
 	end
 end
 
-function Page.list() return listId end
+ns.onLoad(function()
+	ns.on("PLAYER_TARGET_CHANGED", updateAddTarget)
+end)

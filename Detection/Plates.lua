@@ -9,8 +9,12 @@ ns.Plates = Plates
 ---------------------------------------------------------------------------
 -- Marca de banda
 ---------------------------------------------------------------------------
+-- Si el juego bloquea la marca en combate, se deja de intentar hasta salir de combate
+local blockedThisCombat = false
+
 local function canRaidMark(id)
 	if not ns.cfg(id).raidMark then return false end
+	if blockedThisCombat and InCombatLockdown() then return false end
 	if IsInInstance() then return false end -- no pisar las marcas del líder en mazmorras
 	if IsInRaid() then return UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") end
 	return true
@@ -51,6 +55,8 @@ function Plates.setIcon(unit, icon)
 		o = frame
 		o:SetSize(34, 34)
 		o:SetPoint("BOTTOM", plate, "TOP", 0, 4)
+		-- Por encima de las placas de otros add-ons (ElvUI, Plater...), que cuelgan de la misma placa
+		o:SetFrameLevel(plate:GetFrameLevel() + 50)
 		o.tex = o:CreateTexture(nil, "OVERLAY")
 		o.tex:SetAllPoints()
 		overlays[plate] = o
@@ -91,16 +97,24 @@ end
 ---------------------------------------------------------------------------
 -- Eventos
 ---------------------------------------------------------------------------
--- Si el juego bloquea la marca de banda, se desactiva sola (el icono propio sigue funcionando)
+-- Si el juego bloquea la marca de banda: en combate se pausa hasta salir de él; fuera de combate
+-- se desactiva en los ajustes (el icono propio sobre la placa sigue funcionando)
 local function onForbidden(addon, fn)
 	if addon ~= ns.ADDON or type(fn) ~= "string" or not fn:find("SetRaidTarget") then return end
+	if InCombatLockdown() then
+		if not blockedThisCombat then
+			blockedThisCombat = true
+			ns.say(ns.L["El juego no deja poner marcas de banda en combate; vuelvo a intentarlo al salir."])
+		end
+		return
+	end
 	local was = false
 	for _, id in ipairs(ns.ORDER) do
 		was = was or ns.cfg(id).raidMark
 		ns.cfg(id).raidMark = false
 	end
 	if was then
-		ns.say("el juego no deja a los add-ons poner marcas de banda aquí; uso solo el icono sobre la placa.")
+		ns.say(ns.L["El juego no deja a los add-ons poner marcas de banda aquí; uso solo el icono sobre la placa."])
 		ns.fire("SETTINGS_CHANGED")
 	end
 end
@@ -115,6 +129,7 @@ ns.onLoad(function()
 	ns.on("PLAYER_ENTERING_WORLD", function() C_Timer.After(2, Plates.refresh) end)
 	ns.on("ADDON_ACTION_FORBIDDEN", onForbidden)
 	ns.on("ADDON_ACTION_BLOCKED", onForbidden)
+	ns.on("PLAYER_REGEN_ENABLED", function() blockedThisCombat = false end)
 	ns.listen("LISTS_CHANGED", Plates.refresh)
 	ns.listen("SETTINGS_CHANGED", Plates.refresh)
 end)

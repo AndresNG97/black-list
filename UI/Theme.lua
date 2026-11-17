@@ -1,39 +1,45 @@
--- Tema visual: colores, tipografías, fondos planos con borde de 1 px, iconos de clase.
+-- Tema visual: colores, tipografías, fondos planos con borde de 1 píxel real, iconos de clase.
 
 local _, ns = ...
 local UI = ns.UI
 
+-- Contraste sobre el fondo de los paneles (~#17181d): text ~15:1, muted ~7:1, faint ~4.6:1
 UI.C = {
 	bg       = { 0.055, 0.059, 0.071, 0.97 },
 	panel    = { 0.090, 0.094, 0.114, 1 },
 	hover    = { 0.125, 0.130, 0.157, 1 },
+	pressed  = { 0.070, 0.074, 0.090, 1 },
 	field    = { 0.039, 0.043, 0.051, 1 },
-	border   = { 1, 1, 1, 0.07 },
-	borderHi = { 1, 1, 1, 0.15 },
+	border   = { 1, 1, 1, 0.08 },
+	borderHi = { 1, 1, 1, 0.16 },
 	text     = { 0.93, 0.94, 0.96, 1 },
-	muted    = { 0.60, 0.62, 0.68, 1 },
-	faint    = { 0.40, 0.42, 0.48, 1 },
+	muted    = { 0.64, 0.66, 0.72, 1 },
+	faint    = { 0.50, 0.52, 0.58, 1 },
 	accent   = { 0.898, 0.282, 0.302, 1 },
 	accentHi = { 0.957, 0.380, 0.400, 1 },
-	off      = { 0.22, 0.23, 0.27, 1 },
+	off      = { 0.26, 0.27, 0.31, 1 },
 	none     = { 0, 0, 0, 0 },
 }
-UI.HEX = { muted = "9aa0ae", faint = "666b7a", accent = "e5484d" }
+UI.HEX = { muted = "a3a8b8", faint = "808594", accent = "e5484d" }
 
 ---------------------------------------------------------------------------
--- Tipografías: Arial Narrow para el texto, Friz Quadrata para títulos
+-- Tipografías: las del idioma del cliente (así los nombres en cirílico, coreano o chino
+-- se ven bien). Texto: fuente del chat (Arial Narrow en español). Títulos: fuente estándar.
 ---------------------------------------------------------------------------
-local BODY = "Fonts\\ARIALN.TTF"
-local HEAD = STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
 local fonts = {}
+
+local function bodyFont()
+	local file = ChatFontNormal and ChatFontNormal:GetFont()
+	return file or STANDARD_TEXT_FONT
+end
 
 function UI.font(size, head)
 	local key = (head and "H" or "B") .. size
 	local f = fonts[key]
 	if not f then
 		f = CreateFont("ListaNegraFont" .. key)
-		f:SetFont(head and HEAD or BODY, size, "")
-		if not f:GetFont() then f:SetFont(HEAD, size, "") end
+		f:SetFont(head and STANDARD_TEXT_FONT or bodyFont(), size, "")
+		if not f:GetFont() then f:SetFont(STANDARD_TEXT_FONT, size, "") end
 		f:SetTextColor(unpack(UI.C.text))
 		f:SetShadowColor(0, 0, 0, 0.6)
 		f:SetShadowOffset(1, -1)
@@ -51,8 +57,47 @@ function UI.text(parent, size, color, head, layer)
 	return fs
 end
 
+-- Ancho real del texto aunque el FontString esté limitado
+function UI.textWidth(fs)
+	return fs.GetUnboundedStringWidth and fs:GetUnboundedStringWidth() or fs:GetStringWidth()
+end
+
 ---------------------------------------------------------------------------
--- Fondo plano con borde de 1 px (sin plantillas de Blizzard)
+-- Líneas de 1 píxel físico: se recalculan al cambiar la escala de la interfaz o de la ventana
+---------------------------------------------------------------------------
+local pixelLines = setmetatable({}, { __mode = "k" })
+
+local function onePixel(region)
+	local factor = PixelUtil and PixelUtil.GetPixelToUIUnitFactor and PixelUtil.GetPixelToUIUnitFactor()
+	if not factor then
+		local _, h = GetPhysicalScreenSize()
+		factor = 768 / h
+	end
+	-- La escala efectiva de una textura es la de su marco
+	return factor / math.max(region:GetParent():GetEffectiveScale(), 0.01)
+end
+
+local function sizeLine(t)
+	local px = onePixel(t)
+	if t._horizontal then t:SetHeight(px) else t:SetWidth(px) end
+end
+
+function UI.pixelLine(t, horizontal)
+	t._horizontal = horizontal
+	if t.SetSnapToPixelGrid then
+		t:SetSnapToPixelGrid(false)
+		t:SetTexelSnappingBias(0)
+	end
+	pixelLines[t] = true
+	sizeLine(t)
+end
+
+function UI.refreshPixels()
+	for t in pairs(pixelLines) do sizeLine(t) end
+end
+
+---------------------------------------------------------------------------
+-- Fondo plano con borde (sin plantillas de Blizzard)
 ---------------------------------------------------------------------------
 local EDGES = {
 	{ "TOPLEFT", "TOPRIGHT", true }, { "BOTTOMLEFT", "BOTTOMRIGHT", true },
@@ -75,7 +120,7 @@ function UI.skin(f, bg, border)
 			local t = f:CreateTexture(nil, "BORDER", nil, -8)
 			t:SetPoint(e[1])
 			t:SetPoint(e[2])
-			if e[3] then t:SetHeight(1) else t:SetWidth(1) end
+			UI.pixelLine(t, e[3])
 			f._edges[i] = t
 		end
 	end
@@ -99,6 +144,24 @@ function UI.round(tex)
 	m:SetAllPoints(tex)
 	tex:AddMaskTexture(m)
 	return m
+end
+
+-- Aspa dibujada con dos líneas (no depende de que la fuente tenga el carácter ×)
+function UI.cross(parent, size, color)
+	local lines = {}
+	local h = size / 2
+	for i, d in ipairs({ { -h, h, h, -h }, { -h, -h, h, h } }) do
+		local l = parent:CreateLine(nil, "OVERLAY")
+		l:SetThickness(1.6)
+		l:SetColorTexture(unpack(color or UI.C.muted))
+		l:SetStartPoint("CENTER", parent, d[1], d[2])
+		l:SetEndPoint("CENTER", parent, d[3], d[4])
+		lines[i] = l
+	end
+	function lines.SetColor(_, c)
+		for i = 1, 2 do lines[i]:SetColorTexture(unpack(c)) end
+	end
+	return lines
 end
 
 function UI.setClassIcon(tex, class)
@@ -127,8 +190,9 @@ function UI.listRGB(id)
 	return { ns.hexToRGB(ns.LISTS[id].hex) }
 end
 
-function UI.tip(owner, title, text)
-	GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+-- Tooltip estándar: título blanco y descripción gris clara con salto de línea
+function UI.tip(owner, title, text, anchor)
+	GameTooltip:SetOwner(owner, anchor or "ANCHOR_RIGHT")
 	GameTooltip:AddLine(title, 1, 1, 1)
 	if text then GameTooltip:AddLine(text, 0.8, 0.8, 0.82, true) end
 	GameTooltip:Show()
@@ -137,3 +201,8 @@ end
 function UI.click()
 	if SOUNDKIT and SOUNDKIT.U_CHAT_SCROLL_BUTTON then PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON) end
 end
+
+ns.onLoad(function()
+	ns.on("UI_SCALE_CHANGED", UI.refreshPixels)
+	ns.on("DISPLAY_SIZE_CHANGED", UI.refreshPixels)
+end)

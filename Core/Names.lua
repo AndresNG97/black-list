@@ -22,12 +22,24 @@ function ns.splitName(full)
 	return name or full, realm
 end
 
+-- string.lower/upper solo cambian letras ASCII; esto también pasa a minúscula las acentuadas
+-- (Á É Í Ó Ú Ñ Ü...: en UTF-8 son \195 + un byte de 128 a 158; la minúscula es ese byte + 32)
+local function lowerUTF8(s)
+	return (s:lower():gsub("\195([\128-\158])", function(c) return "\195" .. string.char(c:byte() + 32) end))
+end
+
+-- "álvaro" -> "Álvaro", "PEPE" -> "Pepe"
 function ns.prettyName(n)
-	return n:sub(1, 1):upper() .. n:sub(2):lower()
+	n = lowerUTF8(n)
+	local b1, b2 = n:byte(1, 2)
+	if b1 == 195 and b2 and b2 >= 160 and b2 <= 190 and b2 ~= 183 then
+		return "\195" .. string.char(b2 - 32) .. n:sub(3)
+	end
+	return n:sub(1, 1):upper() .. n:sub(2)
 end
 
 function ns.key(name, realm)
-	return (name .. "-" .. ns.normRealm(realm)):lower()
+	return lowerUTF8(name .. "-" .. ns.normRealm(realm))
 end
 
 -- Nombre para mostrar: sin reino si es el tuyo

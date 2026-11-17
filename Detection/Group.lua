@@ -31,7 +31,7 @@ local function checkGroup()
 					alerted[k] = true
 					for _, id in ipairs(GROUP_ORDER) do
 						if hits[id] and ns.cfg(id).inGroup then
-							ns.notify(id, hits[id].entry, "está en tu grupo")
+							ns.notify(id, hits[id].entry, ns.L["está en tu grupo"])
 							break
 						end
 					end
@@ -64,7 +64,7 @@ local function onInvite(inviter)
 	if not hits then return end
 	for _, id in ipairs(GROUP_ORDER) do
 		if hits[id] and ns.cfg(id).invite then
-			ns.notify(id, hits[id].entry, "te invita a su grupo")
+			ns.notify(id, hits[id].entry, ns.L["te invita a su grupo"])
 			return
 		end
 	end

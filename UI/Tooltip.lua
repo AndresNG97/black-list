@@ -15,7 +15,7 @@ local function onUnitTooltip(tt)
 		local h = hits[id]
 		if h then
 			local r, g, b = ns.hexToRGB(ns.LISTS[id].hex)
-			tt:AddLine(("%s Lista negra: %s"):format(ns.icon(ns.cfg(id).icon or 8, 14), ns.LISTS[id].label), r, g, b)
+			tt:AddLine(ns.L["%s Lista negra: %s"]:format(ns.icon(ns.cfg(id).icon or 8, 14), ns.LISTS[id].label), r, g, b)
 			local d = ns.detail(h.entry)
 			if d ~= "" then tt:AddLine(d, 0.85, 0.85, 0.88, true) end
 		end

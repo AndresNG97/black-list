@@ -2,16 +2,20 @@
 
 local _, ns = ...
 local UI = ns.UI
+local L = ns.L
 
 local W
 local current = "pvp"
 
 local function build()
-	W = UI.Window("ListaNegraFrame", 760, 660, "Lista Negra")
+	W = UI.Window({ name = "ListaNegraFrame", w = 760, h = 660, title = L["Lista Negra"], save = "main" })
 
 	local items = {}
-	for i, id in ipairs(ns.ORDER) do items[i] = { value = id } end
-	items[#items + 1] = { value = "avisos", text = "Avisos" }
+	for i, id in ipairs(ns.ORDER) do
+		items[i] = { value = id, tip = id == "pvp" and L["Gente con la que te cruzas en el mundo abierto."]
+			or L["Gente con la que no quieres volver a agruparte."] }
+	end
+	items[#items + 1] = { value = "avisos", text = L["Avisos"], tip = L["Cuándo y cómo te avisa cada lista."] }
 	W.tabs = UI.Tabs(W, items, function(v)
 		current = v
 		ns.refreshWindow()
@@ -28,8 +32,8 @@ local function build()
 	UI.ListPage.build(W.listPage)
 	UI.SettingsPage.build(W.settingsPage)
 
-	W:SetScript("OnShow", function() ns.refreshWindow() end)
-	W:SetScript("OnHide", function()
+	W:HookScript("OnShow", function() ns.refreshWindow() end)
+	W:HookScript("OnHide", function()
 		if UI.Banner.isUnlocked() then UI.Banner.setUnlocked(false) end
 	end)
 end
@@ -39,10 +43,11 @@ function ns.refreshWindow()
 	local counts = {}
 	for _, id in ipairs(ns.ORDER) do
 		counts[id] = ns.count(id)
-		W.tabs:SetItemText(id, ("%s  %s  |cff%s%d|r"):format(ns.icon(ns.cfg(id).icon or 8, 14), ns.LISTS[id].label, UI.HEX.faint, counts[id]))
+		W.tabs:SetItemText(id, ("%s  %s  |cff%s%d|r"):format(ns.icon(ns.cfg(id).icon or 8, 14), ns.LISTS[id].label,
+			UI.HEX.faint, counts[id]))
 	end
 	W.tabs:Select(current)
-	W:SetSubtitle(("%d en mundo abierto · %d en mazmorras y bandas"):format(counts.pvp, counts.grupo))
+	W:SetSubtitle(L["%d en mundo abierto · %d en mazmorras y bandas"]:format(counts.pvp, counts.grupo))
 
 	local settings = current == "avisos"
 	W.listPage:SetShown(not settings)

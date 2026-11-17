@@ -31,16 +31,17 @@ local function onUpdate()
 end
 
 local function showTooltip(self)
+	local L = ns.L
 	GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-	GameTooltip:AddLine(ns.icon(8, 14) .. " Lista Negra", 1, 1, 1)
+	GameTooltip:AddLine(ns.icon(8, 14) .. " " .. L["Lista Negra"], 1, 1, 1)
 	for _, id in ipairs(ns.ORDER) do
 		local r, g, b = ns.hexToRGB(ns.LISTS[id].hex)
 		GameTooltip:AddDoubleLine(ns.LISTS[id].label, tostring(ns.count(id)), r, g, b, 1, 1, 1)
 	end
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine("Clic: abrir las listas", 0.6, 0.62, 0.68)
-	GameTooltip:AddLine("Clic derecho: ajustes de avisos", 0.6, 0.62, 0.68)
-	GameTooltip:AddLine("Arrastrar: mover el icono", 0.6, 0.62, 0.68)
+	GameTooltip:AddLine(L["Clic: abrir las listas"], 0.64, 0.66, 0.72)
+	GameTooltip:AddLine(L["Clic derecho: ajustes de avisos"], 0.64, 0.66, 0.72)
+	GameTooltip:AddLine(L["Arrastrar: mover el icono"], 0.64, 0.66, 0.72)
 	GameTooltip:Show()
 end
 

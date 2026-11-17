@@ -36,6 +36,10 @@ Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores
 | `/ln buscar Nombre` | Dice si alguien está en tus listas |
 | `/ln minimapa` | Muestra u oculta el icono del minimapa |
 | `/ln prueba [pvp o grupo]` | Enseña un aviso de ejemplo |
+| `/ln reset` | Vuelve a centrar las ventanas y el aviso |
+| `/ln ayuda` | Lista todos los comandos |
+
+También aparece en **Opciones → AddOns → Lista Negra**, con accesos a las listas y a los ajustes.
 
 ## Limitaciones de WoW: Forever
 
@@ -51,6 +55,7 @@ WoW: Forever usa el motor de Midnight, con restricciones para los add-ons:
 ```
 Core/        datos y lógica, sin interfaz
   Util         mensajes, lecturas seguras, eventos, avisos internos y arranque
+  Locale       tabla L[] con todos los textos (para traducir)
   Data         listas, motivos, iconos, sonidos y colores
   Settings     datos guardados, valores por defecto y migraciones
   Names        nombres, reinos e identidad de unidades
@@ -70,6 +75,7 @@ UI/          interfaz
   ListPage     página de cada lista
   SettingsPage página de ajustes
   MainWindow   ventana principal y pestañas
+  Options      entrada en Opciones → AddOns
   UnitMenu     clic derecho en retratos y chat
   Tooltip      líneas en el tooltip del jugador
   Minimap      botón del minimapa

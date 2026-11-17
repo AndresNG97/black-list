@@ -6,10 +6,20 @@ local ADDON, ns = ...
 ns.ADDON = ADDON
 ns.UI = {}
 
+---------------------------------------------------------------------------
+-- Mensajes en el chat: siempre con el prefijo del add-on y sin repetir el mismo
+-- mensaje varias veces seguidas
+---------------------------------------------------------------------------
 local PREFIX = "|cffe5484dLista Negra|r: "
+local REPEAT_GAP = 3 -- segundos
+local lastText, lastTime = nil, 0
+
 function ns.say(fmt, ...)
-	if select("#", ...) > 0 then fmt = string.format(fmt, ...) end
-	print(PREFIX .. fmt)
+	local text = select("#", ...) > 0 and string.format(fmt, ...) or fmt
+	local now = GetTime()
+	if text == lastText and now - lastTime < REPEAT_GAP then return end
+	lastText, lastTime = text, now
+	print(PREFIX .. text)
 end
 
 ---------------------------------------------------------------------------
@@ -41,7 +51,7 @@ function ns.on(event, fn)
 	local list = gameHandlers[event]
 	if not list then
 		if not pcall(bus.RegisterEvent, bus, event) then
-			ns.say("el evento %s no existe en este cliente; esa función queda desactivada.", event)
+			ns.say(ns.L["El evento %s no existe en este cliente; esa función queda desactivada."], event)
 			return
 		end
 		list = {}

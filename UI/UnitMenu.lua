@@ -31,18 +31,19 @@ local function later(fn) C_Timer.After(0, fn) end
 local function addToMenu(_, root, ctx)
 	local name, realm, info = identity(ctx)
 	if not name or ns.isMe(name, realm) then return end
+	local L = ns.L
 	root:CreateDivider()
-	root:CreateTitle("Lista Negra")
+	root:CreateTitle(L["Lista Negra"])
 	for _, id in ipairs(ns.ORDER) do
 		local e, k = ns.find(id, name, realm)
 		local label = ns.LISTS[id].label
 		if e then
-			root:CreateButton(("Editar en %s"):format(label), function()
+			root:CreateButton(L["Editar en %s"]:format(label), function()
 				later(function() ns.openEditor({ mode = "edit", list = id, key = k }) end)
 			end)
-			root:CreateButton(("Quitar de %s"):format(label), function() ns.remove(id, k) end)
+			root:CreateButton(L["Quitar de %s"]:format(label), function() ns.remove(id, k) end)
 		else
-			root:CreateButton(("Añadir a %s"):format(label), function()
+			root:CreateButton(L["Añadir a %s"]:format(label), function()
 				later(function() ns.promptAdd(id, name, realm, nil, info) end)
 			end)
 		end

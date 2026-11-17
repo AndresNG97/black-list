@@ -1,8 +1,10 @@
 -- ¿Quién me ha matado?
 -- WoW Forever no deja a los add-ons leer el registro de combate, así que el asesino se deduce:
 -- el jugador enemigo que te tenía en el objetivo en los últimos segundos antes de morir.
+-- Solo trabaja en combate (un sondeo por segundo) y reutiliza las tablas de sospechosos.
 
 local _, ns = ...
+local L = ns.L
 local safe, plain = ns.safe, ns.plain
 
 local WINDOW = 20 -- segundos
@@ -16,9 +18,14 @@ local function note(unit)
 	local strong = plain(safe(UnitIsUnit, unit .. "target", "player")) == true
 	if not strong and unit ~= "target" then return end
 	local k = ns.key(name, realm)
-	local old = suspects[k]
-	if old and old.strong and not strong and GetTime() - old.t < WINDOW then return end
-	suspects[k] = { name = name, realm = realm, info = ns.unitInfo(unit), t = GetTime(), strong = strong }
+	local s, now = suspects[k], GetTime()
+	if s then
+		-- No rebajar a "débil" a quien hace poco te tenía en el objetivo
+		if s.strong and not strong and now - s.t < WINDOW then return end
+		s.t, s.strong = now, strong
+		return
+	end
+	suspects[k] = { name = name, realm = realm, info = ns.unitInfo(unit), t = now, strong = strong }
 end
 
 local function scan()
@@ -57,9 +64,13 @@ local function onDeath()
 	local e = ns.find("pvp", s.name, s.realm, s.info.guid)
 	if e then
 		ns.addKill(e)
-		ns.say("%s te ha vuelto a matar (%d %s).", ns.coloredName(e), e.kills, e.kills == 1 and "vez" or "veces")
+		if e.kills == 1 then
+			ns.say(L["%s te ha matado. Lo apunto en su entrada."], ns.coloredName(e))
+		else
+			ns.say(L["%s te ha vuelto a matar (%d veces)."], ns.coloredName(e), e.kills)
+		end
 	elseif ns.settings.killerPrompt and ns.promptAdd then
-		ns.promptAdd("pvp", s.name, s.realm, ("Me mató en %s"):format(GetZoneText() or "?"), s.info, true)
+		ns.promptAdd("pvp", s.name, s.realm, L["Me mató en %s"]:format(GetZoneText() or "?"), s.info, true)
 	end
 end
 

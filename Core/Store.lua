@@ -81,7 +81,7 @@ function ns.add(id, name, realm, opts)
 	end
 	ns.changed()
 	if not opts.quiet then
-		ns.say(isNew and "%s añadido a %s." or "%s actualizado en %s.", ns.coloredName(e), ns.listTag(id))
+		ns.say(isNew and ns.L["%s añadido a %s."] or ns.L["%s actualizado en %s."], ns.coloredName(e), ns.listTag(id))
 	end
 	return e, k
 end
@@ -91,7 +91,17 @@ function ns.remove(id, k)
 	if not e then return end
 	ns.db.lists[id][k] = nil
 	ns.changed()
-	ns.say("%s quitado de %s.", ns.coloredName(e), ns.listTag(id))
+	ns.say(ns.L["%s quitado de %s."], ns.coloredName(e), ns.listTag(id))
+end
+
+-- Pasa a alguien a la otra lista con todos sus datos
+function ns.move(from, to, k)
+	local e = ns.db.lists[from][k]
+	if not e or ns.db.lists[to][k] then return end
+	ns.db.lists[to][k] = e
+	ns.db.lists[from][k] = nil
+	ns.changed()
+	ns.say(ns.L["%s movido a %s."], ns.coloredName(e), ns.listTag(to))
 end
 
 function ns.addKill(e)
@@ -115,4 +125,39 @@ function ns.recordSighting(id, e, name, unit)
 	ns.fire("SIGHTING")
 end
 
-ns.onLoad(rebuildIndex)
+-- Datos de la 0.3 o anteriores: las claves se calculaban sin pasar a minúscula las letras
+-- acentuadas. Se recalculan; si dos entradas acaban en la misma clave, se fusionan.
+local function merge(into, e)
+	into.kills = (into.kills or 0) + (e.kills or 0)
+	into.seen = (into.seen or 0) + (e.seen or 0)
+	if (into.reason or "") == "" then into.reason = e.reason end
+	if type(e.tags) == "table" then
+		into.tags = into.tags or {}
+		for t in pairs(e.tags) do into.tags[t] = true end
+	end
+	into.added = math.min(into.added or e.added or time(), e.added or into.added or time())
+	into.lastSeen = math.max(into.lastSeen or 0, e.lastSeen or 0)
+	if into.lastSeen == 0 then into.lastSeen = nil end
+end
+
+local function migrateKeys()
+	if ns.db.keyVersion == 2 then return end
+	for _, id in ipairs(ns.ORDER) do
+		local fresh = {}
+		for k, e in pairs(ns.db.lists[id]) do
+			if type(e) == "table" and type(e.name) == "string" then
+				local nk = ns.key(e.name, e.realm)
+				if fresh[nk] then merge(fresh[nk], e) else fresh[nk] = e end
+			else
+				fresh[k] = e
+			end
+		end
+		ns.db.lists[id] = fresh
+	end
+	ns.db.keyVersion = 2
+end
+
+ns.onLoad(function()
+	migrateKeys()
+	rebuildIndex()
+end)

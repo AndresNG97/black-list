@@ -1,10 +1,11 @@
 -- Texto para el chat, los avisos y las ventanas.
 
 local _, ns = ...
+local L = ns.L
 
 function ns.listTag(id)
-	local L = ns.LISTS[id]
-	return "|cff" .. L.hex .. L.label .. "|r"
+	local list = ns.LISTS[id]
+	return "|cff" .. list.hex .. list.label .. "|r"
 end
 
 function ns.classColor(class)
@@ -23,7 +24,7 @@ function ns.icon(index, size)
 	return ("|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_%d:%d|t"):format(index, size or 0)
 end
 
-local FACTION = { Alliance = "|cff4ea8ffAlianza|r", Horde = "|cffe5484dHorda|r" }
+local FACTION = { Alliance = "|cff4ea8ff" .. L["Alianza"] .. "|r", Horde = "|cffe5484d" .. L["Horda"] .. "|r" }
 function ns.factionText(f) return f and (FACTION[f] or f) end
 
 -- Nombres de los motivos marcados, en el orden de la lista de motivos
@@ -48,7 +49,7 @@ function ns.reasonText(e)
 end
 
 function ns.killsText(n)
-	return ("te ha matado %d %s"):format(n, n == 1 and "vez" or "veces")
+	return (n == 1 and L["te ha matado %d vez"] or L["te ha matado %d veces"]):format(n)
 end
 
 -- motivos + "te ha matado N veces"
@@ -61,10 +62,10 @@ function ns.detail(e)
 end
 
 function ns.ago(t)
-	if not t then return "nunca" end
+	if not t then return L["nunca"] end
 	local d = time() - t
-	if d < 60 then return "ahora mismo" end
-	if d < 3600 then return ("hace %d min"):format(math.floor(d / 60)) end
-	if d < 86400 then return ("hace %d h"):format(math.floor(d / 3600)) end
-	return ("hace %d d"):format(math.floor(d / 86400))
+	if d < 60 then return L["ahora mismo"] end
+	if d < 3600 then return L["hace %d min"]:format(math.floor(d / 60)) end
+	if d < 86400 then return L["hace %d h"]:format(math.floor(d / 3600)) end
+	return L["hace %d d"]:format(math.floor(d / 86400))
 end

@@ -1,4 +1,5 @@
 -- Datos guardados (ListaNegraDB): valores por defecto, migraciones y acceso a los ajustes.
+-- Cambios de formato: añadir campos con valor por defecto (fill) o migrar los datos antiguos.
 
 local _, ns = ...
 
@@ -18,7 +19,8 @@ local ALERT_DEFAULTS = {
 
 local GENERAL_DEFAULTS = {
 	killerPrompt = true, -- al morir, ofrecer añadir a quien parece haberte matado
-	alertScale = 1,
+	alertScale = 1,      -- tamaño del aviso en pantalla
+	windowScale = 1,     -- tamaño de las ventanas (se reduce solo si no caben en pantalla)
 	sort = "seen",       -- orden de las listas
 }
 
@@ -48,7 +50,7 @@ end
 local function initDB()
 	if type(ListaNegraDB) ~= "table" then ListaNegraDB = {} end
 	local db = ListaNegraDB
-	db.version = 3
+	db.version = 4
 	if type(db.lists) ~= "table" then db.lists = {} end
 	for _, id in ipairs(ns.ORDER) do
 		if type(db.lists[id]) ~= "table" then db.lists[id] = {} end
@@ -65,6 +67,7 @@ local function initDB()
 	end
 	if type(s.minimap) ~= "table" then s.minimap = {} end
 	fill(s.minimap, { angle = 200, hide = false })
+	if type(s.windows) ~= "table" then s.windows = {} end -- posiciones de las ventanas
 
 	ns.db, ns.settings = db, s
 end

@@ -30,7 +30,7 @@ function ns.snooze(id, k)
 	if id and k then lastAlert[id .. ":" .. k] = GetTime() end
 end
 
--- what: "está cerca", "está en tu grupo"...
+-- what: texto ya traducido ("está cerca", "está en tu grupo"...)
 function ns.notify(id, e, what)
 	local c = ns.cfg(id)
 	local detail = ns.detail(e)
@@ -39,7 +39,8 @@ function ns.notify(id, e, what)
 	end
 	ns.playSound(c.sound)
 	if c.chat then
-		ns.say("%s %s |cff%s%s|r. %s", ns.icon(c.icon or 8, 12), ns.coloredName(e), ns.colorHex(c.color), what, detail)
+		ns.say("%s %s |cff%s%s|r.%s", ns.icon(c.icon or 8, 12), ns.coloredName(e), ns.colorHex(c.color), what,
+			detail ~= "" and (" " .. detail) or "")
 	end
 end
 
@@ -51,5 +52,5 @@ function ns.test(id)
 		kills = id == "pvp" and 3 or 0,
 		tags = id == "pvp" and { campea = true } or { ninja = true },
 	}
-	ns.notify(id, sample, id == "pvp" and "está cerca" or "está en tu grupo")
+	ns.notify(id, sample, id == "pvp" and ns.L["está cerca"] or ns.L["está en tu grupo"])
 end

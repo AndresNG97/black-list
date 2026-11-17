@@ -3,23 +3,28 @@
 local _, ns = ...
 local Plates = ns.Plates
 
--- quiet: solo pintar iconos, sin aviso (al refrescar las placas)
+-- Icono de la placa: manda la lista de mundo abierto si está en las dos
+local function paintPlate(unit, hits)
+	if not unit:find("^nameplate") then return end
+	for _, id in ipairs(ns.ORDER) do
+		if hits[id] and ns.cfg(id).plateIcon then
+			Plates.setIcon(unit, ns.cfg(id).icon or 8)
+			return
+		end
+	end
+end
+
+-- quiet: solo pintar el icono de la placa (al refrescar tras cambiar listas o ajustes);
+-- no cuenta como "visto", no marca y no avisa
 function ns.checkUnit(unit, quiet)
 	local name, realm, guid = ns.unitIdentity(unit)
 	if not name then return end
 	local hits = ns.lookup(name, realm, guid)
 	if not hits then return end
-	for id, h in pairs(hits) do ns.recordSighting(id, h.entry, name, unit) end
+	paintPlate(unit, hits)
+	if quiet then return hits end
 
-	-- Icono de la placa: manda la lista de mundo abierto si está en las dos
-	if unit:find("^nameplate") then
-		for _, id in ipairs(ns.ORDER) do
-			if hits[id] and ns.cfg(id).plateIcon then
-				Plates.setIcon(unit, ns.cfg(id).icon or 8)
-				break
-			end
-		end
-	end
+	for id, h in pairs(hits) do ns.recordSighting(id, h.entry, name, unit) end
 
 	-- Marca de banda: la primera lista que la tenga activada
 	for _, id in ipairs(ns.ORDER) do
@@ -29,14 +34,15 @@ function ns.checkUnit(unit, quiet)
 		end
 	end
 
-	-- Un solo aviso aunque esté en las dos listas
-	if not quiet then
-		for _, id in ipairs(ns.ORDER) do
-			local h = hits[id]
-			if h and ns.cfg(id).nearby and ns.cooled(id, h.key) then
-				ns.notify(id, h.entry, "está cerca")
-				break
+	-- Un solo aviso aunque esté en las dos listas: el aviso cuenta como dado en ambas
+	for _, id in ipairs(ns.ORDER) do
+		local h = hits[id]
+		if h and ns.cfg(id).nearby and ns.cooled(id, h.key) then
+			ns.notify(id, h.entry, ns.L["está cerca"])
+			for other, oh in pairs(hits) do
+				if other ~= id then ns.snooze(other, oh.key) end
 			end
+			break
 		end
 	end
 	return hits

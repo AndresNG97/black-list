@@ -10,20 +10,26 @@ UI.Banner = Banner
 
 local f, unlocked
 
+-- La posición se guarda en unidades de la pantalla (no de la escala del aviso), para que
+-- cambiar el tamaño no lo mueva de sitio
 local function savePos()
 	local point, _, relPoint, x, y = f:GetPoint(1)
-	ns.settings.alertPos = { point = point, relPoint = relPoint, x = x, y = y }
+	local s = f:GetScale()
+	ns.settings.alertPos = { point = point, relPoint = relPoint, x = x * s, y = y * s, screen = true }
 end
 
 local function applyPos()
+	local s = ns.settings.alertScale or 1
+	f:SetScale(s)
 	f:ClearAllPoints()
 	local p = ns.settings.alertPos
 	if type(p) == "table" and p.point then
-		f:SetPoint(p.point, UIParent, p.relPoint or p.point, p.x or 0, p.y or 0)
+		local k = p.screen and s or 1 -- posiciones antiguas guardadas sin convertir
+		f:SetPoint(p.point, UIParent, p.relPoint or p.point, (p.x or 0) / k, (p.y or 0) / k)
 	else
-		f:SetPoint("TOP", UIParent, "TOP", 0, -140)
+		f:SetPoint("TOP", UIParent, "TOP", 0, -140 / s)
 	end
-	f:SetScale(ns.settings.alertScale or 1)
+	UI.refreshPixels()
 end
 
 local function setColor(hex)
@@ -67,10 +73,10 @@ local function build()
 	f.icon:SetPoint("LEFT", 18, 0)
 	f.title = UI.text(f, 17, C.text, true)
 	f.title:SetPoint("TOPLEFT", 68, -14)
-	f.title:SetPoint("RIGHT", -16, 0)
+	f.title:SetPoint("TOPRIGHT", -16, -14)
 	f.sub = UI.text(f, 13, C.muted)
 	f.sub:SetPoint("TOPLEFT", f.title, "BOTTOMLEFT", 0, -5)
-	f.sub:SetPoint("RIGHT", -16, 0)
+	f.sub:SetPoint("TOPRIGHT", f.title, "BOTTOMRIGHT", 0, -5)
 	f.sub:SetWordWrap(true)
 	f.sub:SetMaxLines(2)
 
@@ -122,8 +128,8 @@ function Banner.setUnlocked(on)
 		setColor(UI.HEX.accent)
 		UI.setColors(f, nil, C.accent)
 		UI.raidIcon(f.icon, 8)
-		f.title:SetText("Arrastra el aviso donde quieras")
-		f.sub:SetText("Pulsa «Fijar aviso» en los ajustes cuando termines.")
+		f.title:SetText(ns.L["Arrastra el aviso donde quieras"])
+		f.sub:SetText(ns.L["Pulsa «Fijar aviso» en los ajustes cuando termines."])
 		fit()
 		f:SetAlpha(1)
 		f:Show()
@@ -137,7 +143,7 @@ function Banner.isUnlocked() return unlocked end
 
 function Banner.reset()
 	ns.settings.alertPos = nil
-	applyPos()
+	if f then applyPos() end
 end
 
 ns.onLoad(function()

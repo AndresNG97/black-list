@@ -3,6 +3,7 @@
 local _, ns = ...
 local UI = ns.UI
 local C = UI.C
+local L = ns.L
 local safe, plain = ns.safe, ns.plain
 
 local W = 520
@@ -25,6 +26,12 @@ local function currentName()
 	return ns.splitName(D.nameInput:GetText())
 end
 
+-- "Guardar" solo cuando hay a quién guardar
+local function updateSave()
+	local name = currentName()
+	D.save:SetEnabled(name ~= nil and name ~= "")
+end
+
 -- Rellena motivos y nota: los de la entrada si ya existe, si no los iniciales
 local function loadValues()
 	local tags, note = state.initTags or {}, state.initNote or ""
@@ -43,7 +50,14 @@ local function loadValues()
 			chip:SetSelected(id == state.list and tags[chip.key])
 		end
 	end
-	D.noteInput:SetText(note)
+	-- Lo que hayas escrito tú en la nota no se pierde al cambiar de lista
+	local typed = D.noteInput:GetText()
+	local userEdited = state.loadedNote ~= nil and typed ~= state.loadedNote
+	if not userEdited then
+		D.noteInput:SetText(note)
+		typed = note
+	end
+	state.loadedNote = typed
 end
 
 local function setList(id)
@@ -64,7 +78,7 @@ local function save()
 		if e then
 			e.tags, e.reason = tags, note
 			ns.changed()
-			ns.say("%s actualizado en %s.", ns.coloredName(e), ns.listTag(state.list))
+			ns.say(L["%s actualizado en %s."], ns.coloredName(e), ns.listTag(state.list))
 		end
 		D:Hide()
 		return
@@ -72,13 +86,12 @@ local function save()
 
 	local name, realm = currentName()
 	if name == "" then
-		ns.say("escribe el nombre del jugador.")
 		D.nameInput:SetFocus()
 		return
 	end
 	if not state.gameName then name = ns.prettyName(name) end
 	if ns.isMe(name, realm) then
-		ns.say("no puedes añadirte a ti mismo.")
+		ns.say(L["No puedes añadirte a ti mismo."])
 		return
 	end
 	local e, k = ns.add(state.list, name, realm, { reason = note, tags = tags, info = state.info, exact = true })
@@ -91,11 +104,10 @@ end
 -- Construcción
 ---------------------------------------------------------------------------
 local function build()
-	D = UI.Window("ListaNegraEditor", W, 430, "", "FULLSCREEN_DIALOG")
-	D:SetPoint("CENTER", 0, 40)
+	D = UI.Window({ name = "ListaNegraEditor", w = W, h = 430, strata = "FULLSCREEN_DIALOG", save = "editor" })
 
 	-- Jugador: retrato y nombre (si viene del juego) o campo para escribirlo
-	UI.Section(D, "Jugador", 18, -64)
+	UI.Section(D, L["Jugador"], 18, -64)
 	D.who = CreateFrame("Frame", nil, D)
 	D.who:SetPoint("TOPLEFT", 18, -82)
 	D.who:SetSize(W - 36, 34)
@@ -105,12 +117,16 @@ local function build()
 	UI.round(D.whoIcon)
 	D.whoName = UI.text(D.who, 15, nil, true)
 	D.whoName:SetPoint("TOPLEFT", D.whoIcon, "TOPRIGHT", 10, -1)
+	D.whoName:SetPoint("TOPRIGHT", D.who, "TOPRIGHT", 0, -1)
 	D.whoMeta = UI.text(D.who, 12, C.muted)
 	D.whoMeta:SetPoint("TOPLEFT", D.whoName, "BOTTOMLEFT", 0, -3)
+	D.whoMeta:SetPoint("TOPRIGHT", D.whoName, "BOTTOMRIGHT", 0, -3)
 
-	D.nameInput = UI.Input(D, W - 36, 30, "Nombre o Nombre-Reino")
+	D.nameInput = UI.Input(D, W - 36, 30, L["Nombre o Nombre-Reino"])
 	D.nameInput:SetPoint("TOPLEFT", 18, -84)
 	D.nameInput:SetScript("OnEnterPressed", function() D.noteInput:SetFocus() end)
+	D.nameInput:SetScript("OnTabPressed", function() D.noteInput:SetFocus() end)
+	D.nameInput:HookScript("OnTextChanged", function() if D.save then updateSave() end end)
 	-- Si escribes el nombre de alguien que ya está, carga sus motivos (si no, no toca lo marcado)
 	D.nameInput:HookScript("OnEditFocusLost", function()
 		if state.mode ~= "add" or state.gameName then return end
@@ -121,7 +137,7 @@ local function build()
 	end)
 
 	-- Lista
-	UI.Section(D, "Lista", 18, -130)
+	UI.Section(D, L["Lista"], 18, -130)
 	local items = {}
 	for i, id in ipairs(ns.ORDER) do
 		items[i] = { value = id, text = ns.LISTS[id].label, rgb = UI.listRGB(id) }
@@ -130,7 +146,7 @@ local function build()
 	D.listSelect:SetPoint("TOPLEFT", 18, -148)
 
 	-- Motivos
-	UI.Section(D, "Motivos", 18, -196)
+	UI.Section(D, L["Motivos"], 18, -196)
 	D.chips = {}
 	local chipsH = 0
 	for _, id in ipairs(ns.ORDER) do
@@ -145,24 +161,31 @@ local function build()
 
 	-- Nota (debajo de las etiquetas, que pueden ocupar varias filas)
 	local noteY = -214 - chipsH - 18
-	UI.Section(D, "Nota", 18, noteY)
-	D.noteInput = UI.Input(D, W - 36, 30, "Opcional: qué pasó, dónde, con quién...")
+	UI.Section(D, L["Nota"], 18, noteY)
+	D.noteInput = UI.Input(D, W - 36, 30, L["Opcional: qué pasó, dónde, con quién..."])
 	D.noteInput:SetPoint("TOPLEFT", 18, noteY - 18)
-	D:SetHeight(-(noteY - 18) + 30 + 24 + 30 + 18)
 	D.noteInput:SetMaxLetters(250)
 	D.noteInput:SetScript("OnEnterPressed", save)
+	D.noteInput:SetScript("OnTabPressed", function()
+		if D.nameInput:IsShown() then D.nameInput:SetFocus() end
+	end)
+	local height = -(noteY - 18) + 30 + 24 + 30 + 18
+	D:SetHeight(height)
+	D.baseH = height
 
 	-- Botones
-	D.save = UI.Button(D, SAVE or "Guardar", "primary", 120, 30, save)
+	D.save = UI.Button(D, SAVE or L["Guardar"], "primary", 120, 30, save)
 	D.save:SetPoint("BOTTOMRIGHT", -18, 18)
-	D.cancel = UI.Button(D, CANCEL or "Cancelar", "secondary", 110, 30, function() D:Hide() end)
+	D.save.tip = L["Guarda los motivos y la nota (Intro)."]
+	D.cancel = UI.Button(D, CANCEL or L["Cancelar"], "secondary", 110, 30, function() D:Hide() end)
 	D.cancel:SetPoint("RIGHT", D.save, "LEFT", -8, 0)
-	D.remove = UI.Button(D, "Quitar de la lista", "danger", nil, 30, function()
+	D.cancel.tip = L["Cierra sin guardar (Esc)."]
+	D.remove = UI.Button(D, L["Quitar de la lista"], "danger", nil, 30, function()
 		local e = ns.entry(state.list, state.key)
 		if not e then return end
 		local list, key = state.list, state.key
 		D:Hide()
-		UI.confirm("Quitar de la lista", ("¿Quitar a %s de %s?"):format(ns.coloredName(e), ns.listTag(list)), "Quitar",
+		UI.confirm(L["Quitar de la lista"], L["¿Quitar a %s de %s?"]:format(ns.coloredName(e), ns.listTag(list)), L["Quitar"],
 			function() ns.remove(list, key) end)
 	end)
 	D.remove:SetPoint("BOTTOMLEFT", 18, 18)
@@ -175,7 +198,7 @@ local function showWho(name, realm, info)
 	UI.setClassIcon(D.whoIcon, info.class)
 	D.whoName:SetText(ns.coloredName({ name = name, realm = ns.normRealm(realm), class = info.class }))
 	local meta = {}
-	if info.level then meta[#meta + 1] = "Nivel " .. info.level end
+	if info.level then meta[#meta + 1] = L["Nivel %d"]:format(info.level) end
 	if info.race then meta[#meta + 1] = info.race end
 	if info.faction then meta[#meta + 1] = ns.factionText(info.faction) end
 	D.whoMeta:SetText(table.concat(meta, " · "))
@@ -196,19 +219,20 @@ function ns.openEditor(opts)
 	if state.mode == "edit" then
 		local e = ns.entry(opts.list, opts.key)
 		if not e then return end
-		D:SetTitle("Editar entrada")
-		D:SetSubtitle(("Añadido el %s · visto %s"):format(date("%d/%m/%Y", e.added or time()), ns.ago(e.lastSeen)))
+		D:SetTitle(L["Editar entrada"])
+		D:SetSubtitle(L["Añadido el %s · visto %s"]:format(date("%d/%m/%Y", e.added or time()), ns.ago(e.lastSeen)))
 		showWho(e.name, e.realm, e)
+		state.gameName, state.gameRealm = e.name, e.realm
 		state.initTags, state.initNote = copyTags(e.tags), e.reason or ""
 		D.remove:Show()
 	else
 		D.remove:Hide()
 		if opts.fromKill then
-			D:SetTitle("Parece que te ha matado")
-			D:SetSubtitle("¿Lo añades a tu lista negra?")
+			D:SetTitle(L["Parece que te ha matado"])
+			D:SetSubtitle(L["¿Lo añades a tu lista negra?"])
 		else
-			D:SetTitle("Añadir a la lista negra")
-			D:SetSubtitle("Elige la lista y marca los motivos")
+			D:SetTitle(L["Añadir a la lista negra"])
+			D:SetSubtitle(L["Elige la lista y marca los motivos"])
 		end
 		if opts.name then
 			state.gameName, state.gameRealm = opts.name, opts.realm
@@ -219,6 +243,7 @@ function ns.openEditor(opts)
 		end
 	end
 	setList(opts.list or "pvp")
+	updateSave()
 	D:Show()
 	D:Raise()
 	if state.mode == "add" and not opts.name then D.nameInput:SetFocus() end
@@ -229,15 +254,21 @@ function ns.promptAdd(id, name, realm, note, info, fromKill)
 	ns.openEditor({ mode = "add", list = id, name = name, realm = realm, note = note, info = info, fromKill = fromKill })
 end
 
+-- ¿Tu objetivo es un jugador que se puede añadir? (para activar el botón "Añadir objetivo")
+function ns.targetIsAddable()
+	if plain(safe(UnitIsUnit, "target", "player")) then return false end
+	return ns.unitIdentity("target") ~= nil
+end
+
 -- Añade a tu objetivo: directamente si ya traes motivos o nota, si no abre la ventana
 function ns.addTarget(id, note, tags)
 	if plain(safe(UnitIsUnit, "target", "player")) then
-		ns.say("no puedes añadirte a ti mismo.")
+		ns.say(L["No puedes añadirte a ti mismo."])
 		return
 	end
 	local name, realm = ns.unitIdentity("target")
 	if not name then
-		ns.say("selecciona primero a un jugador, o usa «Añadir por nombre».")
+		ns.say(L["Selecciona primero a un jugador, o usa «Añadir por nombre»."])
 		return
 	end
 	local info = ns.unitInfo("target")

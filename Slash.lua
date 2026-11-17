@@ -1,23 +1,28 @@
--- Comandos /ln y /listanegra.
+-- Comandos /ln y /listanegra. "/ln ayuda" los lista todos.
 
 local _, ns = ...
+local L = ns.L
 
 local function help()
-	ns.say("comandos:")
+	ns.say(L["comandos:"])
 	local lines = {
-		{ "/ln", "abre o cierra la ventana" },
-		{ "/ln avisos", "ajustes de los avisos" },
-		{ "/ln pvp", "añade a tu objetivo a Mundo abierto" },
-		{ "/ln grupo", "añade a tu objetivo a Mazmorras / Bandas" },
-		{ "/ln grupo Nombre ninja toxico nota", "añade por nombre con motivos y nota" },
-		{ "/ln grupo * ninja", "igual, con tu objetivo" },
-		{ "/ln motivos", "palabras de los motivos" },
-		{ "/ln quitar [pvp o grupo] Nombre", "quita de una lista (o de las dos)" },
-		{ "/ln buscar Nombre", "dice si alguien está en tus listas" },
-		{ "/ln minimapa", "muestra u oculta el icono del minimapa" },
-		{ "/ln prueba [pvp o grupo]", "enseña un aviso de ejemplo" },
+		{ "/ln", L["abre o cierra la ventana"] },
+		{ "/ln avisos", L["ajustes de los avisos"] },
+		{ "/ln pvp", L["añade a tu objetivo a Mundo abierto"] },
+		{ "/ln grupo", L["añade a tu objetivo a Mazmorras / Bandas"] },
+		{ "/ln grupo " .. L["Nombre"] .. " ninja toxico " .. L["nota"], L["añade por nombre con motivos y nota"] },
+		{ "/ln grupo * ninja", L["igual, con tu objetivo"] },
+		{ "/ln motivos", L["palabras de los motivos"] },
+		{ "/ln quitar [pvp|grupo] " .. L["Nombre"], L["quita de una lista (o de las dos)"] },
+		{ "/ln buscar " .. L["Nombre"], L["dice si alguien está en tus listas"] },
+		{ "/ln minimapa", L["muestra u oculta el icono del minimapa"] },
+		{ "/ln prueba [pvp|grupo]", L["enseña un aviso de ejemplo"] },
+		{ "/ln reset", L["vuelve a centrar las ventanas y el aviso"] },
 	}
-	for _, l in ipairs(lines) do print(("  |cffffd100%s|r  %s"):format(l[1], l[2])) end
+	for _, l in ipairs(lines) do
+		-- "||" muestra una barra vertical en el chat
+		print(("  |cffffd100%s|r  %s"):format((l[1]:gsub("|", "||")), l[2]))
+	end
 end
 
 -- Palabras iniciales que son motivos -> etiquetas; el resto es la nota
@@ -41,6 +46,7 @@ local function addCmd(id, rest)
 	end
 	local n, r = ns.splitName(who)
 	n = ns.prettyName(n)
+	if ns.isMe(n, r) then return ns.say(L["No puedes añadirte a ti mismo."]) end
 	local tags, note = parseTags(id, more)
 	if note ~= "" or next(tags) then
 		local _, k = ns.add(id, n, r, { reason = note, tags = tags })
@@ -67,17 +73,17 @@ local function removeCmd(rest)
 			end
 		end
 	end
-	if not done then ns.say("%s no está en tus listas.", who) end
+	if not done then ns.say(L["%s no está en tus listas."], who) end
 end
 
 local function searchCmd(rest)
 	if rest == "" then return help() end
 	local n, r = ns.splitName(rest)
 	local hits = ns.lookup(n, r)
-	if not hits then return ns.say("%s no está en tus listas.", rest) end
+	if not hits then return ns.say(L["%s no está en tus listas."], rest) end
 	for _, id in ipairs(ns.ORDER) do
 		local h = hits[id]
-		if h then ns.say("%s está en %s. %s", ns.coloredName(h.entry), ns.listTag(id), ns.detail(h.entry)) end
+		if h then ns.say(L["%s está en %s. %s"], ns.coloredName(h.entry), ns.listTag(id), ns.detail(h.entry)) end
 	end
 end
 
@@ -89,23 +95,31 @@ local function presetsCmd()
 	end
 end
 
+local function resetCmd()
+	ns.UI.resetWindows()
+	ns.UI.Banner.reset()
+	ns.say(L["Ventanas y aviso de vuelta en el centro de la pantalla."])
+end
+
+local function minimapCmd()
+	ns.settings.minimap.hide = not ns.settings.minimap.hide
+	ns.fire("SETTINGS_CHANGED")
+	ns.say(ns.settings.minimap.hide and L["Icono del minimapa oculto."] or L["Icono del minimapa visible."])
+end
+
+local function alertsCmd() ns.openWindow("avisos") end
+local function testCmd(rest) ns.test(ns.listId(rest) or "pvp") end
+
 local COMMANDS = {
-	avisos = function() ns.openWindow("avisos") end,
-	opciones = function() ns.openWindow("avisos") end,
-	config = function() ns.openWindow("avisos") end,
+	avisos = alertsCmd, opciones = alertsCmd, config = alertsCmd,
 	motivos = presetsCmd,
 	quitar = removeCmd, borrar = removeCmd, remove = removeCmd,
 	buscar = searchCmd, ver = searchCmd,
-	minimapa = function()
-		ns.settings.minimap.hide = not ns.settings.minimap.hide
-		ns.fire("SETTINGS_CHANGED")
-		ns.say("icono del minimapa %s.", ns.settings.minimap.hide and "oculto" or "visible")
-	end,
-	prueba = function(rest) ns.test(ns.listId(rest) or "pvp") end,
-	ayuda = help, help = help,
+	minimapa = minimapCmd, minimap = minimapCmd,
+	prueba = testCmd, test = testCmd,
+	reset = resetCmd,
+	ayuda = help, help = help, ["?"] = help,
 }
-COMMANDS.minimap = COMMANDS.minimapa
-COMMANDS.test = COMMANDS.prueba
 
 local function slash(msg)
 	msg = strtrim(msg or "")
@@ -116,6 +130,7 @@ local function slash(msg)
 	if id then return addCmd(id, rest) end
 	local fn = COMMANDS[cmd]
 	if fn then return fn(rest) end
+	ns.say(L["No conozco «%s»."], cmd)
 	help()
 end
 
