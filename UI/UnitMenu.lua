@@ -14,13 +14,11 @@ local function identity(ctx)
 	if type(ctx) ~= "table" then return end
 	local unit = ctx.unit
 	if type(unit) == "string" and not isSecret(unit) and plain(safe(UnitExists, unit)) then
-		local name, realm = ns.unitIdentity(unit)
-		if not name then return end
-		return name, realm, ns.unitInfo(unit)
+		return ns.app:identify(unit)
 	end
 	local name = ctx.name
 	if type(name) ~= "string" or isSecret(name) or name == "" then return end
-	local n, r = ns.splitName(name)
+	local n, r = ns.app:parseName(name)
 	local server = ctx.server
 	if type(server) == "string" and not isSecret(server) and server ~= "" then r = server end
 	return n, r
@@ -30,18 +28,18 @@ local function later(fn) C_Timer.After(0, fn) end
 
 local function addToMenu(_, root, ctx)
 	local name, realm, info = identity(ctx)
-	if not name or ns.isMe(name, realm) then return end
+	if not name or ns.app:isMe(name, realm) then return end
 	local L = ns.L
 	root:CreateDivider()
 	root:CreateTitle(L["Blacklist"])
 	for _, id in ipairs(ns.ORDER) do
-		local e, k = ns.find(id, name, realm)
+		local e, k = ns.app:find(id, name, realm)
 		local label = ns.LISTS[id].label
 		if e then
 			root:CreateButton(L["Edit in %s"]:format(label), function()
 				later(function() ns.openEditor({ mode = "edit", list = id, key = k }) end)
 			end)
-			root:CreateButton(L["Remove from %s"]:format(label), function() ns.remove(id, k) end)
+			root:CreateButton(L["Remove from %s"]:format(label), function() ns.app:remove(id, k) end)
 		else
 			root:CreateButton(L["Add to %s"]:format(label), function()
 				later(function() ns.promptAdd(id, name, realm, nil, info) end)

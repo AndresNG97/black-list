@@ -10,7 +10,7 @@ Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores
 ## Funciones
 
 - Dos listas con **motivos predeterminados** (Ninja, Needea todo, Abandona el grupo, Campea tu cadáver, Mata a niveles bajos...) y una nota libre.
-- **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si está en tu grupo y en las invitaciones, tuyas o suyas), cómo (aviso en pantalla, chat, icono sobre la placa, marca de banda), icono, sonido, color, duración y cada cuánto se repite.
+- **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si está en tu grupo y en las invitaciones, tuyas o suyas), cómo (aviso en pantalla, chat, icono sobre la placa), icono, sonido, color, duración y cada cuánto se repite.
 - **Aviso en pantalla** que puedes mover y cambiar de tamaño.
 - **Al morir**, te propone añadir al jugador enemigo que parece haberte matado y cuenta las muertes.
 - **Clic derecho** en retratos y nombres del chat para añadir, editar o quitar.
@@ -44,6 +44,7 @@ Valen `/ln`, `/listanegra` y `/blacklist`.
 | `/ln quitar [pvp o grupo] Nombre` | Quita de una lista (o de las dos) |
 | `/ln buscar Nombre` | Dice si alguien está en tus listas |
 | `/ln comprobar` | Dice quién de tu grupo está en tus listas |
+| `/ln placas` | Activa las placas de enemigos (siempre visibles) para detectar a los que tienes cerca |
 | `/ln minimapa` | Muestra u oculta el icono del minimapa |
 | `/ln prueba [pvp o grupo]` | Enseña un aviso de ejemplo |
 | `/ln reset` | Vuelve a centrar las ventanas y el aviso |
@@ -59,8 +60,8 @@ WoW: Forever usa el motor de Midnight, con restricciones para los add-ons:
 
 - **El registro de combate no está disponible.** "Quién te ha matado" se deduce del jugador enemigo que te tenía en el objetivo en los últimos segundos, por eso pregunta antes de añadirlo.
 - **En instancias, campos de batalla y arenas** el juego puede ocultar la identidad de los jugadores; ahí no se les reconoce.
-- **La detección cercana usa las placas de nombre:** actívalas para enemigos (tecla V). Sin ellas solo se detecta al seleccionar a alguien o pasarle el ratón por encima.
-- Si el juego no deja poner **marcas de banda**, el add-on las desactiva solo y sigue usando su icono propio sobre la placa.
+- **La detección cercana usa las placas de nombre (unos 40 metros):** WoW Forever no deja a los add-ons leer el registro de combate, así que activa las placas de enemigos y **Mostrar siempre las placas**, o escribe `/ln placas`. Sin ellas solo se detecta al seleccionar a alguien, ponerlo de foco o pasarle el ratón por encima.
+- **Sin marcas de banda:** el juego ya no deja a los add-ons ponerlas (sale el aviso de "acción bloqueada"), así que solo se dibuja el icono propio sobre la placa.
 
 ## Traducción
 

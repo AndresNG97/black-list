@@ -17,7 +17,7 @@ local function track(c, enabledIf)
 	return c
 end
 
-local function changed() ns.fire("SETTINGS_CHANGED") end
+local function changed() ns.app:settingsChanged() end
 
 ---------------------------------------------------------------------------
 -- Options
@@ -44,7 +44,7 @@ local WINDOW_SCALES = {
 }
 
 local WHEN = {
-	{ "nearby", L["When nearby"], L["When their nameplate shows up, you target them or you mouse over them."] },
+	{ "nearby", L["When nearby"], L["When their nameplate shows up (about 40 yards), you target or focus them, or mouse over them."] },
 	{ "inGroup", L["When in your group"], L["When they join your party or raid, or you join theirs."] },
 	{ "invite", L["Invites"], L["When they invite you, or you invite them."] },
 }
@@ -52,7 +52,6 @@ local HOW = {
 	{ "screen", L["On-screen alert"], L["Card in the middle of the screen with their name and reasons."] },
 	{ "chat", L["Chat message"], L["Prints the alert in your chat window. Only you see it."] },
 	{ "plateIcon", L["Nameplate icon"], L["Draws the chosen icon above their nameplate. Only you see it. Needs nameplates turned on (V key)."] },
-	{ "raidMark", L["Raid marker"], L["Puts the chosen raid marker on them. Your group sees it too. Never inside instances, so it doesn't override the leader's markers."] },
 }
 
 ---------------------------------------------------------------------------
@@ -62,7 +61,7 @@ local CARD_W, PAD = 356, 16
 local INNER = CARD_W - PAD * 2
 
 local function listCard(parent, id, x)
-	local cfg = function() return ns.cfg(id) end
+	local cfg = function() return ns.app:cfg(id) end
 	local groupAlerts = ns.LISTS[id].groupAlerts
 	local anyAlert = function()
 		local c = cfg()
@@ -81,7 +80,7 @@ local function listCard(parent, id, x)
 	local icon = card:CreateTexture(nil, "ARTWORK")
 	icon:SetSize(20, 20)
 	icon:SetPoint("TOPLEFT", PAD, -14)
-	local test = UI.Button(card, L["Test"], "secondary", nil, 24, function() ns.test(id) end)
+	local test = UI.Button(card, L["Test"], "secondary", nil, 24, function() ns.app:test(id) end)
 	test:SetPoint("TOPRIGHT", -PAD, -12)
 	test.tip = L["Shows a sample alert with these settings."]
 	local title = UI.text(card, 15, C.text, true)
@@ -130,12 +129,11 @@ local function listCard(parent, id, x)
 	toggle(HOW[1], anyAlert)
 	toggle(HOW[2], anyAlert)
 	toggle(HOW[3])
-	toggle(HOW[4])
 	y = y - 6
 	section(L["Style"])
 	local c = cfg
-	dropdown(L["Icon"], L["Icon for the alert, the nameplate and the raid marker."], ICONS, "icon",
-		function() return c().screen or c().chat or c().plateIcon or c().raidMark end)
+	dropdown(L["Icon"], L["Icon for the alert and the nameplate."], ICONS, "icon",
+		function() return c().screen or c().chat or c().plateIcon end)
 	dropdown(L["Sound"], L["Plays with every alert. You hear it when you pick it."], SOUNDS, "sound", anyAlert, ns.playSound)
 	dropdown(L["Color"], L["Color of the on-screen alert and the chat text."], COLORS, "color",
 		function() return anyAlert() and (c().screen or c().chat) end)
@@ -150,7 +148,7 @@ end
 -- General card
 ---------------------------------------------------------------------------
 local function generalCard(parent)
-	local S = function() return ns.settings end
+	local S = function() return ns.app:settings() end
 	local card = UI.panel(parent, C.panel, C.border)
 	card:SetSize(CARD_W * 2 + 16, 104)
 	card:SetPoint("TOPLEFT", 16, -452)

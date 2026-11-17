@@ -30,12 +30,12 @@ local SORTERS = {
 
 local function entries()
 	local out, f = {}, filter:lower()
-	for k, e in pairs(ns.db.lists[listId]) do
+	for k, e in pairs(ns.app:entries(listId)) do
 		if f == "" or k:find(f, 1, true) or ns.reasonText(e):lower():find(f, 1, true) then
 			out[#out + 1] = { k = k, e = e, list = listId }
 		end
 	end
-	table.sort(out, SORTERS[ns.settings.sort] or SORTERS.seen)
+	table.sort(out, SORTERS[ns.app:settings().sort] or SORTERS.seen)
 	return out
 end
 
@@ -46,7 +46,7 @@ local function other(id) return id == "pvp" and "grupo" or "pvp" end
 
 local function confirmRemove(data)
 	UI.confirm(L["Remove from list"], L["Remove %s from %s?"]:format(ns.coloredName(data.e), ns.listTag(data.list)), L["Remove"],
-		function() ns.remove(data.list, data.k) end)
+		function() ns.app:remove(data.list, data.k) end)
 end
 
 local function rowMenu(row)
@@ -56,8 +56,8 @@ local function rowMenu(row)
 		root:CreateTitle(ns.fullName(data.e))
 		root:CreateButton(L["Edit reasons and note"], function() ns.openEditor({ mode = "edit", list = data.list, key = data.k }) end)
 		local to = other(data.list)
-		if not ns.entry(to, data.k) then
-			root:CreateButton(L["Move to %s"]:format(ns.LISTS[to].label), function() ns.move(data.list, to, data.k) end)
+		if not ns.app:entry(to, data.k) then
+			root:CreateButton(L["Move to %s"]:format(ns.LISTS[to].label), function() ns.app:move(data.list, to, data.k) end)
 		end
 		root:CreateDivider()
 		root:CreateButton("|cffe5484d" .. L["Remove from list"] .. "|r", function() confirmRemove(data) end)
@@ -186,7 +186,7 @@ end
 ---------------------------------------------------------------------------
 local function updateAddTarget()
 	if not Page.addTarget then return end
-	local ok = ns.targetIsAddable()
+	local ok = ns.app:targetIsAddable()
 	Page.addTarget:SetEnabled(ok)
 	Page.addTarget.tip = ok and L["Adds the player you have targeted."]
 		or L["Target a player (other than yourself) to add them."]
@@ -200,13 +200,13 @@ function Page.build(parent)
 		Page.refresh()
 	end)
 
-	Page.sort = UI.Dropdown(parent, nil, SORTS, function() return ns.settings.sort end,
-		function(v) ns.settings.sort = v; Page.refresh() end, 170, 170)
+	Page.sort = UI.Dropdown(parent, nil, SORTS, function() return ns.app:settings().sort end,
+		function(v) ns.app:settings().sort = v; Page.refresh() end, 170, 170)
 	Page.sort:SetPoint("LEFT", Page.search, "RIGHT", 8, 0)
 	Page.sort.tipTitle = L["Sort"]
 	Page.sort.tip = L["Changes the list order."]
 
-	Page.addTarget = UI.Button(parent, L["+ Add target"], "primary", nil, 30, function() ns.addTarget(listId) end)
+	Page.addTarget = UI.Button(parent, L["+ Add target"], "primary", nil, 30, function() ns.app:addTarget(listId) end)
 	Page.addTarget:SetPoint("TOPRIGHT", -16, -14)
 	Page.addName = UI.Button(parent, L["Add by name"], "secondary", nil, 30,
 		function() ns.openEditor({ mode = "add", list = listId }) end)
@@ -266,7 +266,7 @@ function Page.refresh(id)
 	local empty = Page.empty
 	empty:SetShown(#list == 0)
 	if #list == 0 then
-		UI.raidIcon(empty.icon, ns.cfg(listId).icon or 8)
+		UI.raidIcon(empty.icon, ns.app:cfg(listId).icon or 8)
 		if filter ~= "" then
 			empty.title:SetText(L["No results"])
 			empty.hint:SetText(L["Nobody in %s matches \"%s\"."]:format(ns.LISTS[listId].label, filter))

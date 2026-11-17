@@ -1,10 +1,11 @@
--- Shared utilities: messages, safe reads, game events, internal notices and startup.
+-- ADAPTER · WoW runtime: chat messages, safe reads, game events, the internal event bus and startup.
 -- WoW Forever uses the Midnight engine: some reads can return "secret" values
--- (identity hidden in instances, BGs or arenas). Everything that reads a unit goes through safe/plain.
+-- (identity hidden in instances, BGs or arenas). Every adapter that reads a unit goes through safe/plain.
 
 local ADDON, ns = ...
 ns.ADDON = ADDON
 ns.UI = {}
+ns.Adapters = {}
 
 ---------------------------------------------------------------------------
 -- Chat messages: always with the add-on prefix, and the same message is not
@@ -41,7 +42,7 @@ local call = securecallfunction or function(fn, ...) return fn(...) end
 ns.call = call
 
 ---------------------------------------------------------------------------
--- Game events: a single frame, several modules per event
+-- Game events: a single frame, several handlers per event
 ---------------------------------------------------------------------------
 local bus = CreateFrame("Frame")
 local gameHandlers = {}
@@ -66,7 +67,7 @@ bus:SetScript("OnEvent", function(_, event, ...)
 end)
 
 ---------------------------------------------------------------------------
--- Internal notices between modules
+-- Internal notices from the application to the UI (the "events" port)
 --   LISTS_CHANGED      someone was added, edited or removed
 --   SETTINGS_CHANGED   a setting changed
 --   SIGHTING           someone on the lists was seen ("seen", level... change)
@@ -84,10 +85,15 @@ function ns.fire(name, ...)
 	for i = 1, #list do call(list[i], ...) end
 end
 
+ns.Adapters.events = { publish = ns.fire }
+
 ---------------------------------------------------------------------------
--- Startup: each module registers its init with ns.onLoad (in .toc order)
+-- Startup, when the saved variables are loaded:
+--   ns.onBoot(fn)  the composition root (Main.lua): builds ns.app
+--   ns.onLoad(fn)  every other module, in .toc order, once ns.app exists
 ---------------------------------------------------------------------------
-local inits = {}
+local boots, inits = {}, {}
+function ns.onBoot(fn) boots[#boots + 1] = fn end
 function ns.onLoad(fn) inits[#inits + 1] = fn end
 
 local boot = CreateFrame("Frame")
@@ -95,5 +101,6 @@ boot:RegisterEvent("ADDON_LOADED")
 boot:SetScript("OnEvent", function(self, _, name)
 	if name ~= ADDON then return end
 	self:UnregisterEvent("ADDON_LOADED")
+	for i = 1, #boots do call(boots[i]) end
 	for i = 1, #inits do call(inits[i]) end
 end)

@@ -10,7 +10,7 @@ An add-on for **World of Warcraft: Forever** that keeps blacklists of players an
 ## Features
 
 - Two lists with **preset reasons** (Ninja, Needs on everything, Leaves the group, Camps your corpse, Kills low levels...) plus a free-text note.
-- **Alerts you set up per list:** when to alert (when nearby; for Dungeons / Raids also when they're in your group and on invites, yours or theirs), how (on-screen alert, chat, nameplate icon, raid marker), icon, sound, color, duration and how often it repeats.
+- **Alerts you set up per list:** when to alert (when nearby; for Dungeons / Raids also when they're in your group and on invites, yours or theirs), how (on-screen alert, chat, nameplate icon), icon, sound, color, duration and how often it repeats.
 - **On-screen alert** you can move and resize.
 - **When you die**, it offers to add the enemy player who seems to have killed you, and counts the kills.
 - **Right-click** on portraits and chat names to add, edit or remove.
@@ -44,6 +44,7 @@ An add-on for **World of Warcraft: Forever** that keeps blacklists of players an
 | `/ln remove [pvp or group] Name` | Removes from one list (or both) |
 | `/ln search Name` | Tells you if someone is on your lists |
 | `/ln check` | Shows who in your group is on your lists |
+| `/ln nameplates` | Turns on enemy nameplates (always shown) so nearby players are detected |
 | `/ln minimap` | Shows or hides the minimap icon |
 | `/ln test [pvp or group]` | Shows a sample alert |
 | `/ln reset` | Re-centers the windows and the alert |
@@ -59,8 +60,8 @@ WoW: Forever runs on the Midnight engine, which restricts add-ons:
 
 - **The combat log isn't available.** "Who killed you" is worked out from the enemy player who had you targeted in the last few seconds, so it asks before adding them.
 - **In instances, battlegrounds and arenas** the game can hide players' identities. They aren't recognized there.
-- **Nearby detection uses nameplates:** turn on enemy nameplates (V key). Without them, people are only detected when you target them or mouse over them.
-- If the game doesn't allow **raid markers**, the add-on turns them off by itself and keeps using its own nameplate icon.
+- **Nearby detection uses nameplates (about 40 yards):** WoW Forever doesn't let add-ons read the combat log, so turn on enemy nameplates and **Always show nameplates**, or just type `/ln nameplates`. Without them, people are only detected when you target, focus or mouse over them.
+- **No raid markers:** the game no longer lets add-ons set them (it shows a "blocked action" popup), so Player Blacklist only draws its own icon on the nameplate.
 
 ## Translating
 
@@ -68,38 +69,47 @@ Every on-screen text goes through `L["..."]`, and the key is the English text. T
 
 ## Code layout
 
+Hexagonal architecture (ports and adapters). The rules don't know about WoW; the game is plugged in from the outside.
+
 ```
-Core/        data and logic, no UI
-  Util         chat messages, safe reads, events, internal signals and startup
-  Locale       L[] table with every text
-  Data         lists, reasons, icons, sounds and colors
-  Settings     saved data, defaults and migrations
-  Names        names, realms and unit identity
-  Store        add, remove, find and record when someone is seen
-  Format       text for chat and windows
-Locales/     translations (esES: Spanish for Spain and Latin America)
-Detection/   what happens in the game
-  Notify       sound, on-screen alert, chat and alert cooldown
-  Plates       nameplate icon and raid marker
-  Nearby       people nearby (nameplates, target, mouseover)
-  Group        group and invites
-  Killer       who killed you
-UI/          interface
-  Theme        colors, fonts and flat backgrounds
-  Widgets      window, buttons, toggles, dropdowns, inputs, tabs, chips
-  Banner       on-screen alert
-  Editor       add / edit window
-  ListPage     page for each list
-  SettingsPage settings page
-  MainWindow   main window and tabs
-  Options      entry in Options → AddOns
-  UnitMenu     right-click on portraits and chat
-  Tooltip      lines in the player tooltip
-  Minimap      minimap button
-Slash.lua    /ln commands
+                 driving adapters                         driven adapters
+  game events, invite hooks ─┐                      ┌─ clock, store, player   (Adapters/Game)
+  /ln commands               ├─► Application (App) ─┤  units, party           (Adapters/Units)
+  windows, menus, tooltip    ┘     uses Domain      ├─ plates                 (Adapters/Nameplates)
+                                                    ├─ alerts                 (Adapters/Alerts → UI/Banner)
+                                                    ├─ notices                (Adapters/Notices)
+                                                    ├─ prompt                 (UI/Editor)
+                                                    └─ events                 (Adapters/Runtime → UI)
 ```
 
-Modules talk to each other through internal signals (`LISTS_CHANGED`, `SETTINGS_CHANGED`, `SIGHTING`) instead of calling each other directly.
+```
+Domain/        the rules, pure Lua: no WoW API (checked automatically)
+  Names          keys, realms, "Name-Realm"
+  Catalog        lists, preset reasons, option keys
+  Entry          create, edit, merge, kills, sightings
+  Blacklist      the two lists: find, add, remove, move, GUID index, key migration
+  AlertPolicy    which list alerts, cooldowns, nameplate icon
+  KillerGuess    who killed you (suspects in the last 20 seconds)
+  Settings       defaults and migrations of the saved data
+Application/   use cases
+  Ports          what the application needs from outside (clock, store, units, alerts...)
+  App            every use case: add, remove, seen nearby, group, invites, death, /ln check...
+Adapters/      the ports on the WoW API, and what calls the use cases
+  Runtime        chat, safe reads, game events, internal events, startup
+  Text           texts and formatting for chat and windows
+  Game           clock, saved variables, your character
+  Units          unit identity (with the game's secret values), group members
+  Nameplates     icon above the nameplate, nameplate settings
+  Alerts         sound, on-screen alert and chat
+  Notices        chat feedback
+  GameEvents     game events and invite hooks → use cases
+  Slash          /ln commands → use cases
+Locales/       L[] table and translations (esES: Spanish for Spain and Latin America)
+UI/            windows, alert, menus and tooltip (they call ns.app)
+Main.lua       composition root: plugs the adapters into the ports and creates ns.app
+```
+
+To change a rule, edit `Domain/` or `Application/` and test it without the game, with fake ports. To support another client or API change, edit only the adapter involved.
 
 ## License
 

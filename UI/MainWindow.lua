@@ -42,8 +42,8 @@ function ns.refreshWindow()
 	if not (W and W:IsShown()) then return end
 	local counts = {}
 	for _, id in ipairs(ns.ORDER) do
-		counts[id] = ns.count(id)
-		W.tabs:SetItemText(id, ("%s  %s  |cff%s%d|r"):format(ns.icon(ns.cfg(id).icon or 8, 14), ns.LISTS[id].label,
+		counts[id] = ns.app:count(id)
+		W.tabs:SetItemText(id, ("%s  %s  |cff%s%d|r"):format(ns.icon(ns.app:cfg(id).icon or 8, 14), ns.LISTS[id].label,
 			UI.HEX.faint, counts[id]))
 	end
 	W.tabs:Select(current)

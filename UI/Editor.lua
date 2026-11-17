@@ -4,7 +4,6 @@ local _, ns = ...
 local UI = ns.UI
 local C = UI.C
 local L = ns.L
-local safe, plain = ns.safe, ns.plain
 
 local W = 520
 local D -- the window
@@ -23,7 +22,7 @@ end
 ---------------------------------------------------------------------------
 local function currentName()
 	if state.gameName then return state.gameName, state.gameRealm end
-	return ns.splitName(D.nameInput:GetText())
+	return ns.app:parseName(D.nameInput:GetText())
 end
 
 -- "Save" only when there is someone to save
@@ -38,7 +37,7 @@ local function loadValues()
 	state.loadedName = D.nameInput:GetText()
 	if state.mode == "add" then
 		local name, realm = currentName()
-		local e = name ~= "" and ns.find(state.list, name, realm)
+		local e = name ~= "" and ns.app:find(state.list, name, realm)
 		if e then
 			tags = e.tags or {}
 			if note == "" then note = e.reason or "" end
@@ -73,13 +72,9 @@ local function save()
 	end
 	local note = strtrim(D.noteInput:GetText() or "")
 
+	local app = ns.app
 	if state.mode == "edit" then
-		local e = ns.entry(state.list, state.key)
-		if e then
-			e.tags, e.reason = tags, note
-			ns.changed()
-			ns.say(L["%s updated in %s."], ns.coloredName(e), ns.listTag(state.list))
-		end
+		app:edit(state.list, state.key, tags, note)
 		D:Hide()
 		return
 	end
@@ -89,14 +84,10 @@ local function save()
 		D.nameInput:SetFocus()
 		return
 	end
-	if not state.gameName then name = ns.prettyName(name) end
-	if ns.isMe(name, realm) then
-		ns.say(L["You can't add yourself."])
-		return
-	end
-	local e, k = ns.add(state.list, name, realm, { reason = note, tags = tags, info = state.info, exact = true })
-	if e and state.fromKill then ns.addKill(e) end
-	ns.snooze(state.list, k)
+	if not state.gameName then name = app:parseName(name, true) end
+	local e, k = app:add(state.list, name, realm, { reason = note, tags = tags, info = state.info, exact = true, snooze = true })
+	if not e then return end -- e.g. you can't add yourself
+	if state.fromKill then app:addKill(state.list, k) end
 	D:Hide()
 end
 
@@ -132,8 +123,8 @@ local function build()
 		if state.mode ~= "add" or state.gameName then return end
 		local text = D.nameInput:GetText()
 		if text == state.loadedName then return end
-		local n, r = ns.splitName(text)
-		if n ~= "" and ns.find(state.list, n, r) then loadValues() else state.loadedName = text end
+		local n, r = ns.app:parseName(text)
+		if n ~= "" and ns.app:find(state.list, n, r) then loadValues() else state.loadedName = text end
 	end)
 
 	-- List
@@ -181,12 +172,12 @@ local function build()
 	D.cancel:SetPoint("RIGHT", D.save, "LEFT", -8, 0)
 	D.cancel.tip = L["Closes without saving (Esc)."]
 	D.remove = UI.Button(D, L["Remove from list"], "danger", nil, 30, function()
-		local e = ns.entry(state.list, state.key)
+		local e = ns.app:entry(state.list, state.key)
 		if not e then return end
 		local list, key = state.list, state.key
 		D:Hide()
 		UI.confirm(L["Remove from list"], L["Remove %s from %s?"]:format(ns.coloredName(e), ns.listTag(list)), L["Remove"],
-			function() ns.remove(list, key) end)
+			function() ns.app:remove(list, key) end)
 	end)
 	D.remove:SetPoint("BOTTOMLEFT", 18, 18)
 end
@@ -196,7 +187,7 @@ local function showWho(name, realm, info)
 	D.who:Show()
 	D.nameInput:Hide()
 	UI.setClassIcon(D.whoIcon, info.class)
-	D.whoName:SetText(ns.coloredName({ name = name, realm = ns.normRealm(realm), class = info.class }))
+	D.whoName:SetText(ns.coloredName({ name = name, realm = ns.app:normRealm(realm), class = info.class }))
 	local meta = {}
 	if info.level then meta[#meta + 1] = L["Level %d"]:format(info.level) end
 	if info.race then meta[#meta + 1] = info.race end
@@ -217,7 +208,7 @@ function ns.openEditor(opts)
 	D.nameInput:SetText("")
 
 	if state.mode == "edit" then
-		local e = ns.entry(opts.list, opts.key)
+		local e = ns.app:entry(opts.list, opts.key)
 		if not e then return end
 		D:SetTitle(L["Edit entry"])
 		D:SetSubtitle(L["Added %s · seen %s"]:format(date(L["%b %d, %Y"], e.added or time()), ns.ago(e.lastSeen)))
@@ -249,33 +240,17 @@ function ns.openEditor(opts)
 	if state.mode == "add" and not opts.name then D.nameInput:SetFocus() end
 end
 
--- Used by the right-click menu, /ln and the "Looks like they killed you" prompt
+-- Used by the right-click menu and /ln
 function ns.promptAdd(id, name, realm, note, info, fromKill)
 	ns.openEditor({ mode = "add", list = id, name = name, realm = realm, note = note, info = info, fromKill = fromKill })
 end
 
--- Is your target a player that can be added? (to enable the "Add target" button)
-function ns.targetIsAddable()
-	if plain(safe(UnitIsUnit, "target", "player")) then return false end
-	return ns.unitIdentity("target") ~= nil
-end
-
--- Adds your target: directly if reasons or a note are passed in, otherwise opens the window
-function ns.addTarget(id, note, tags)
-	if plain(safe(UnitIsUnit, "target", "player")) then
-		ns.say(L["You can't add yourself."])
-		return
-	end
-	local name, realm = ns.unitIdentity("target")
-	if not name then
-		ns.say(L["Target a player first, or use \"Add by name\"."])
-		return
-	end
-	local info = ns.unitInfo("target")
-	if (note and note ~= "") or (tags and next(tags)) then
-		local _, k = ns.add(id, name, realm, { reason = note, tags = tags, info = info })
-		ns.snooze(id, k)
-	else
-		ns.promptAdd(id, name, realm, nil, info)
-	end
-end
+-- ADAPTER · Port prompt: the application asks to open the add window
+-- (your target without reasons, or "Looks like they killed you")
+ns.Adapters.prompt = {
+	add = function(id, name, realm, info, ctx)
+		ctx = ctx or {}
+		local note = ctx.fromKill and L["Killed me in %s"]:format(ctx.zone or "?") or nil
+		ns.promptAdd(id, name, realm, note, info, ctx.fromKill)
+	end,
+}

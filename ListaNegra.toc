@@ -4,7 +4,7 @@
 ## Notes-esES: Listas negras de jugadores: mundo abierto (PvP) y mazmorras/bandas. Iconos y avisos al verlos o agruparte con ellos. /ln
 ## Notes-esMX: Listas negras de jugadores: mundo abierto (PvP) y mazmorras/bandas. Iconos y avisos al verlos o agruparte con ellos. /ln
 ## Author: AndresNG97
-## Version: 1.0.2
+## Version: 1.0.3
 ## SavedVariables: ListaNegraDB
 ## IconTexture: Interface\TargetingFrame\UI-RaidTargetingIcon_8
 ## AddonCompartmentFunc: ListaNegra_OnCompartmentClick
@@ -12,22 +12,33 @@
 ## X-License: MIT
 ## X-Curse-Project-ID: 1812326
 
-# Core: data and logic, no UI
-Core\Util.lua
-Core\Locale.lua
+# Runtime and texts
+Adapters\Runtime.lua
+Locales\Locale.lua
 Locales\esES.lua
-Core\Data.lua
-Core\Settings.lua
-Core\Names.lua
-Core\Store.lua
-Core\Format.lua
 
-# Detection and alerts
-Detection\Notify.lua
-Detection\Plates.lua
-Detection\Nearby.lua
-Detection\Group.lua
-Detection\Killer.lua
+# Domain: the rules, pure Lua (no WoW API)
+Domain\Names.lua
+Domain\Catalog.lua
+Domain\Entry.lua
+Domain\Blacklist.lua
+Domain\AlertPolicy.lua
+Domain\KillerGuess.lua
+Domain\Settings.lua
+
+# Application: use cases and the ports they need
+Application\Ports.lua
+Application\App.lua
+
+# Adapters: the ports on the WoW API, and game events / commands calling the use cases
+Adapters\Text.lua
+Adapters\Game.lua
+Adapters\Units.lua
+Adapters\Nameplates.lua
+Adapters\Alerts.lua
+Adapters\Notices.lua
+Adapters\GameEvents.lua
+Adapters\Slash.lua
 
 # UI
 UI\Theme.lua
@@ -42,4 +53,5 @@ UI\UnitMenu.lua
 UI\Tooltip.lua
 UI\Minimap.lua
 
-Slash.lua
+# Composition root: plugs the adapters into the application
+Main.lua

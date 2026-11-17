@@ -497,7 +497,7 @@ local windows = {}
 -- Places the window at its saved position (in screen units) or in the center
 local function place(f)
 	f:ClearAllPoints()
-	local saved = f.saveKey and ns.settings.windows[f.saveKey]
+	local saved = f.saveKey and ns.app:settings().windows[f.saveKey]
 	if saved and saved.point then
 		local s = f:GetScale()
 		f:SetPoint(saved.point, UIParent, saved.relPoint or saved.point, (saved.x or 0) / s, (saved.y or 0) / s)
@@ -507,7 +507,7 @@ local function place(f)
 end
 
 local function fit(f)
-	local want = ns.settings.windowScale or 1
+	local want = ns.app:settings().windowScale or 1
 	local maxW = (UIParent:GetWidth() - 40) / f.baseW
 	local maxH = (UIParent:GetHeight() - 40) / f.baseH
 	local s = math.max(0.5, math.min(want, maxW, maxH))
@@ -570,7 +570,7 @@ function UI.Window(opts)
 			-- In screen units: resizing the window doesn't move it
 			local point, _, relPoint, x, y = f:GetPoint(1)
 			local s = f:GetScale()
-			ns.settings.windows[opts.save] = { point = point, relPoint = relPoint, x = x * s, y = y * s }
+			ns.app:settings().windows[opts.save] = { point = point, relPoint = relPoint, x = x * s, y = y * s }
 		end
 	end)
 
@@ -604,7 +604,7 @@ end
 
 -- Puts the windows back in the center (in case one ended up off screen)
 function UI.resetWindows()
-	wipe(ns.settings.windows)
+	wipe(ns.app:settings().windows)
 	for _, f in ipairs(windows) do
 		f:ClearAllPoints()
 		f:SetPoint("CENTER")

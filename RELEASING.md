@@ -8,7 +8,7 @@
    Pick the WoW: Forever game version and paste the 1.0.0 changelog.
 4. Wait for CurseForge moderation to approve the project (usually a day or two).
 
-To build the zip yourself, copy `ListaNegra.toc`, `LICENSE`, `README.md`, `CHANGELOG.md` and the folders `Core`, `Locales`, `Detection`, `UI` and `Slash.lua` into a folder called `ListaNegra`, and zip that folder.
+To build the zip yourself, copy `ListaNegra.toc`, `LICENSE`, `README.md`, `CHANGELOG.md`, `Main.lua` and the folders `Domain`, `Application`, `Adapters`, `Locales` and `UI` into a folder called `ListaNegra`, and zip that folder.
 
 ## Later releases (automatic, optional)
 

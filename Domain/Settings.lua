@@ -1,23 +1,30 @@
--- Saved data (ListaNegraDB): defaults, migrations and access to the settings.
+-- DOMAIN · Saved data: defaults and migrations. Pure Lua.
 -- Format changes: add fields with a default value (fill) or migrate the old data.
 
 local _, ns = ...
+ns.Domain = ns.Domain or {}
+local Catalog = ns.Domain.Catalog
+local Settings = {}
+ns.Domain.Settings = Settings
+
+Settings.VERSION = 4
+Settings.KEY_VERSION = 2
 
 -- Per-list settings: pvp = open world, grupo = dungeons and raids
-local ALERT_DEFAULTS = {
-	pvp = { -- inGroup/invite are not used in the open world (see groupAlerts in Data.lua)
+Settings.ALERT_DEFAULTS = {
+	pvp = { -- inGroup/invite are not used in the open world (groupAlerts = false)
 		nearby = true, inGroup = false, invite = false, screen = true, chat = true,
-		plateIcon = true, raidMark = true, icon = 8, sound = "RAID_WARNING", color = "rojo",
+		plateIcon = true, icon = 8, sound = "RAID_WARNING", color = "rojo",
 		duration = 5, cooldown = 120,
 	},
 	grupo = {
 		nearby = false, inGroup = true, invite = true, screen = true, chat = true,
-		plateIcon = true, raidMark = false, icon = 7, sound = "READY_CHECK", color = "naranja",
+		plateIcon = true, icon = 7, sound = "READY_CHECK", color = "naranja",
 		duration = 8, cooldown = 120,
 	},
 }
 
-local GENERAL_DEFAULTS = {
+Settings.GENERAL_DEFAULTS = {
 	killerPrompt = true, -- on death, offer to add whoever seems to have killed you
 	alertScale = 1,      -- size of the on-screen alert
 	windowScale = 1,     -- size of the windows (shrinks automatically if they don't fit on screen)
@@ -32,7 +39,6 @@ local function migrateV1(s)
 	p.nearby, g.nearby = s.alertPvp, s.alertGrupoNearby
 	p.inGroup, g.inGroup = s.alertGroup, s.alertGroup
 	p.invite, g.invite = s.alertGroup, s.alertGroup
-	p.raidMark = s.raidMark
 	p.plateIcon, g.plateIcon = s.plateIcon, s.plateIcon
 	if s.sound == false then p.sound, g.sound = "none", "none" end
 	p.cooldown, g.cooldown = s.cooldown, s.cooldown
@@ -47,33 +53,29 @@ local function fill(t, defaults)
 	end
 end
 
-local function initDB()
-	if type(ListaNegraDB) ~= "table" then ListaNegraDB = {} end
-	local db = ListaNegraDB
-	db.version = 4
-	if type(db.lists) ~= "table" then db.lists = {} end
-	for _, id in ipairs(ns.ORDER) do
-		if type(db.lists[id]) ~= "table" then db.lists[id] = {} end
-	end
-
-	if type(db.settings) ~= "table" then db.settings = {} end
-	local s = db.settings
-	migrateV1(s)
-	fill(s, GENERAL_DEFAULTS)
-	if type(s.alerts) ~= "table" then s.alerts = {} end
-	for _, id in ipairs(ns.ORDER) do
-		if type(s.alerts[id]) ~= "table" then s.alerts[id] = {} end
-		fill(s.alerts[id], ALERT_DEFAULTS[id])
-	end
-	if type(s.minimap) ~= "table" then s.minimap = {} end
-	fill(s.minimap, { angle = 200, hide = false })
-	if type(s.windows) ~= "table" then s.windows = {} end -- window positions
-
-	ns.db, ns.settings = db, s
+local function tbl(parent, k)
+	if type(parent[k]) ~= "table" then parent[k] = {} end
+	return parent[k]
 end
 
--- Alert settings of a list
-function ns.cfg(id) return ns.settings.alerts[id] end
+-- Brings any saved table up to date. Returns db, needsKeyMigration.
+function Settings.prepare(db)
+	db.version = Settings.VERSION
+	local lists = tbl(db, "lists")
+	for _, id in ipairs(Catalog.ORDER) do tbl(lists, id) end
 
--- First of all the inits: the other modules can then find ns.db and ns.settings
-ns.onLoad(initDB)
+	local s = tbl(db, "settings")
+	migrateV1(s)
+	fill(s, Settings.GENERAL_DEFAULTS)
+	local alerts = tbl(s, "alerts")
+	for _, id in ipairs(Catalog.ORDER) do
+		fill(tbl(alerts, id), Settings.ALERT_DEFAULTS[id])
+		alerts[id].raidMark = nil -- removed in 1.0.3: the game no longer lets add-ons set raid markers
+	end
+	fill(tbl(s, "minimap"), { angle = 200, hide = false })
+	tbl(s, "windows") -- window positions
+
+	local needsKeys = db.keyVersion ~= Settings.KEY_VERSION
+	db.keyVersion = Settings.KEY_VERSION
+	return db, needsKeys
+end

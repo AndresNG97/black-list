@@ -8,7 +8,7 @@ Player Blacklist keeps two blacklists of players and warns you the moment you ru
 
 The people who camp your corpse, gank lowbies or jump you while you quest. When one of them shows up nearby:
 
-- a **skull** appears over their head (on their nameplate, and optionally as a raid marker),
+- a **skull** appears over their head (on their nameplate),
 - an **alert** pops up in the middle of your screen with your reasons and how many times they've killed you,
 - a sound plays and a line goes to your chat.
 
@@ -21,7 +21,7 @@ Ninjas, toxic players, leavers, people who don't do their role... You get warned
 ## Features
 
 - **Preset reasons** for each list (Ninja, Needs on everything, Leaves the group, Camps your corpse, Kills low levels...) plus a free-text note.
-- **Alerts set up per list:** when (nearby, in your group, invites either way), how (on-screen alert, chat, nameplate icon, raid marker), icon, sound, color, duration and cooldown.
+- **Alerts set up per list:** when (nearby, in your group, invites either way), how (on-screen alert, chat, nameplate icon), icon, sound, color, duration and cooldown.
 - **On-screen alert** you can move and resize.
 - **Right-click** on unit portraits and chat names to add, edit or remove someone.
 - **Tooltip** shows the list and reasons when you mouse over a listed player.
@@ -40,6 +40,7 @@ Ninjas, toxic players, leavers, people who don't do their role... You get warned
 | `/ln remove Name` | Remove from your lists |
 | `/ln search Name` | Check if someone is on your lists |
 | `/ln check` | See who in your group is on your lists |
+| `/ln nameplates` | Turn on enemy nameplates so nearby players are detected |
 | `/ln test` | Show a sample alert |
 | `/ln help` | Every command |
 
@@ -51,8 +52,8 @@ WoW: Forever runs on the Midnight engine, which limits what add-ons can do:
 
 - **There's no combat log for add-ons.** "Who killed you" is worked out from the enemy player who had you targeted in the last few seconds, so Player Blacklist always asks before adding them.
 - **Inside instances, battlegrounds and arenas** the game can hide player identities, so listed players aren't recognized there.
-- **Nearby detection uses nameplates.** Turn on enemy nameplates (V key). Without them, players are only detected when you target or mouse over them.
-- If the game blocks **raid markers**, Player Blacklist turns them off and keeps using its own nameplate icon.
+- **Nearby detection uses nameplates (about 40 yards).** WoW Forever doesn't let add-ons read the combat log, so turn on enemy nameplates and **Always show nameplates**, or type `/ln nameplates`. Without them, players are only detected when you target, focus or mouse over them.
+- **No raid markers:** WoW Forever doesn't let add-ons set them, so Player Blacklist draws its own icon on the nameplate instead.
 
 Everything stays on your computer: your lists are saved per account in your SavedVariables and are never shared.
 

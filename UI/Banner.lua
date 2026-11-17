@@ -15,14 +15,14 @@ local f, unlocked
 local function savePos()
 	local point, _, relPoint, x, y = f:GetPoint(1)
 	local s = f:GetScale()
-	ns.settings.alertPos = { point = point, relPoint = relPoint, x = x * s, y = y * s, screen = true }
+	ns.app:settings().alertPos = { point = point, relPoint = relPoint, x = x * s, y = y * s, screen = true }
 end
 
 local function applyPos()
-	local s = ns.settings.alertScale or 1
+	local s = ns.app:settings().alertScale or 1
 	f:SetScale(s)
 	f:ClearAllPoints()
-	local p = ns.settings.alertPos
+	local p = ns.app:settings().alertPos
 	if type(p) == "table" and p.point then
 		local k = p.screen and s or 1 -- old positions saved without converting
 		f:SetPoint(p.point, UIParent, p.relPoint or p.point, (p.x or 0) / k, (p.y or 0) / k)
@@ -102,7 +102,7 @@ end
 
 -- id: list (for the icon, color and duration); e: the person; what: "is nearby"...
 function Banner.show(id, e, what, detail)
-	local c = ns.cfg(id)
+	local c = ns.app:cfg(id)
 	get()
 	if unlocked then return end
 	local hex = ns.colorHex(c.color)
@@ -142,7 +142,7 @@ end
 function Banner.isUnlocked() return unlocked end
 
 function Banner.reset()
-	ns.settings.alertPos = nil
+	ns.app:settings().alertPos = nil
 	if f then applyPos() end
 end
 

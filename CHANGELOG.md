@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+- **Fixed the "blocked action" popup on every alert.** WoW Forever (Midnight engine) no longer lets add-ons set raid markers, so the raid marker option is gone. The icon above the nameplate still works.
+- **Open world: better nearby detection.** Players on the list are also detected when you focus them, and a nameplate that shows up before the player's name has loaded is checked again a moment later.
+- New `/ln nameplates`: turns on enemy nameplates and Always show nameplates, which nearby detection needs (about 40 yards). If they're off, the add-on tells you once when you log in.
+- Internal: the code is reorganized as a hexagonal architecture (Domain, Application, Adapters). Nothing changes in game, and your lists and settings are kept.
+
 ## 1.0.2
 
 - **Dungeons / Raids: alert when you invite someone on the list.** Before, only invites you received alerted.

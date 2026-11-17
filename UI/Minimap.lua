@@ -6,7 +6,7 @@ local btn
 local RADIUS = 5
 
 local function place()
-	local angle = math.rad(ns.settings.minimap.angle or 200)
+	local angle = math.rad(ns.app:settings().minimap.angle or 200)
 	local x, y = math.cos(angle), math.sin(angle)
 	local shape = GetMinimapShape and GetMinimapShape() or "ROUND"
 	if shape == "SQUARE" then
@@ -26,7 +26,7 @@ local function onUpdate()
 	local px, py = GetCursorPosition()
 	local scale = Minimap:GetEffectiveScale()
 	px, py = px / scale, py / scale
-	ns.settings.minimap.angle = math.deg(math.atan2(py - my, px - mx)) % 360
+	ns.app:settings().minimap.angle = math.deg(math.atan2(py - my, px - mx)) % 360
 	place()
 end
 
@@ -36,7 +36,7 @@ local function showTooltip(self)
 	GameTooltip:AddLine(ns.icon(8, 14) .. " " .. L["Blacklist"], 1, 1, 1)
 	for _, id in ipairs(ns.ORDER) do
 		local r, g, b = ns.hexToRGB(ns.LISTS[id].hex)
-		GameTooltip:AddDoubleLine(ns.LISTS[id].label, tostring(ns.count(id)), r, g, b, 1, 1, 1)
+		GameTooltip:AddDoubleLine(ns.LISTS[id].label, tostring(ns.app:count(id)), r, g, b, 1, 1, 1)
 	end
 	GameTooltip:AddLine(" ")
 	GameTooltip:AddLine(L["Click: open the lists"], 0.64, 0.66, 0.72)
@@ -95,7 +95,7 @@ end
 local function update()
 	if not Minimap then return end
 	if not btn then build() end
-	btn:SetShown(not ns.settings.minimap.hide)
+	btn:SetShown(not ns.app:settings().minimap.hide)
 	place()
 end
 ns.updateMinimap = update
