@@ -104,7 +104,7 @@ local function onForbidden(addon, fn)
 	if InCombatLockdown() then
 		if not blockedThisCombat then
 			blockedThisCombat = true
-			ns.say(ns.L["El juego no deja poner marcas de banda en combate; vuelvo a intentarlo al salir."])
+			ns.say(ns.L["The game blocks raid markers in combat; trying again when combat ends."])
 		end
 		return
 	end
@@ -114,7 +114,7 @@ local function onForbidden(addon, fn)
 		ns.cfg(id).raidMark = false
 	end
 	if was then
-		ns.say(ns.L["El juego no deja a los add-ons poner marcas de banda aquí; uso solo el icono sobre la placa."])
+		ns.say(ns.L["The game doesn't let add-ons set raid markers here; using only the nameplate icon."])
 		ns.fire("SETTINGS_CHANGED")
 	end
 end

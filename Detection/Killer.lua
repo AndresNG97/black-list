@@ -65,12 +65,12 @@ local function onDeath()
 	if e then
 		ns.addKill(e)
 		if e.kills == 1 then
-			ns.say(L["%s te ha matado. Lo apunto en su entrada."], ns.coloredName(e))
+			ns.say(L["%s killed you. Noted on their entry."], ns.coloredName(e))
 		else
-			ns.say(L["%s te ha vuelto a matar (%d veces)."], ns.coloredName(e), e.kills)
+			ns.say(L["%s killed you again (%d times)."], ns.coloredName(e), e.kills)
 		end
 	elseif ns.settings.killerPrompt and ns.promptAdd then
-		ns.promptAdd("pvp", s.name, s.realm, L["Me mató en %s"]:format(GetZoneText() or "?"), s.info, true)
+		ns.promptAdd("pvp", s.name, s.realm, L["Killed me in %s"]:format(GetZoneText() or "?"), s.info, true)
 	end
 end
 

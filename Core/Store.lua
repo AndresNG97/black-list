@@ -81,7 +81,7 @@ function ns.add(id, name, realm, opts)
 	end
 	ns.changed()
 	if not opts.quiet then
-		ns.say(isNew and ns.L["%s añadido a %s."] or ns.L["%s actualizado en %s."], ns.coloredName(e), ns.listTag(id))
+		ns.say(isNew and ns.L["%s added to %s."] or ns.L["%s updated in %s."], ns.coloredName(e), ns.listTag(id))
 	end
 	return e, k
 end
@@ -91,7 +91,7 @@ function ns.remove(id, k)
 	if not e then return end
 	ns.db.lists[id][k] = nil
 	ns.changed()
-	ns.say(ns.L["%s quitado de %s."], ns.coloredName(e), ns.listTag(id))
+	ns.say(ns.L["%s removed from %s."], ns.coloredName(e), ns.listTag(id))
 end
 
 -- Pasa a alguien a la otra lista con todos sus datos
@@ -101,7 +101,7 @@ function ns.move(from, to, k)
 	ns.db.lists[to][k] = e
 	ns.db.lists[from][k] = nil
 	ns.changed()
-	ns.say(ns.L["%s movido a %s."], ns.coloredName(e), ns.listTag(to))
+	ns.say(ns.L["%s moved to %s."], ns.coloredName(e), ns.listTag(to))
 end
 
 function ns.addKill(e)

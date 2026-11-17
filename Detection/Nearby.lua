@@ -38,7 +38,7 @@ function ns.checkUnit(unit, quiet)
 	for _, id in ipairs(ns.ORDER) do
 		local h = hits[id]
 		if h and ns.cfg(id).nearby and ns.cooled(id, h.key) then
-			ns.notify(id, h.entry, ns.L["está cerca"])
+			ns.notify(id, h.entry, ns.L["is nearby"])
 			for other, oh in pairs(hits) do
 				if other ~= id then ns.snooze(other, oh.key) end
 			end

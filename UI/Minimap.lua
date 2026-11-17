@@ -33,15 +33,15 @@ end
 local function showTooltip(self)
 	local L = ns.L
 	GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-	GameTooltip:AddLine(ns.icon(8, 14) .. " " .. L["Lista Negra"], 1, 1, 1)
+	GameTooltip:AddLine(ns.icon(8, 14) .. " " .. L["Blacklist"], 1, 1, 1)
 	for _, id in ipairs(ns.ORDER) do
 		local r, g, b = ns.hexToRGB(ns.LISTS[id].hex)
 		GameTooltip:AddDoubleLine(ns.LISTS[id].label, tostring(ns.count(id)), r, g, b, 1, 1, 1)
 	end
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine(L["Clic: abrir las listas"], 0.64, 0.66, 0.72)
-	GameTooltip:AddLine(L["Clic derecho: ajustes de avisos"], 0.64, 0.66, 0.72)
-	GameTooltip:AddLine(L["Arrastrar: mover el icono"], 0.64, 0.66, 0.72)
+	GameTooltip:AddLine(L["Click: open the lists"], 0.64, 0.66, 0.72)
+	GameTooltip:AddLine(L["Right-click: alert settings"], 0.64, 0.66, 0.72)
+	GameTooltip:AddLine(L["Drag: move the icon"], 0.64, 0.66, 0.72)
 	GameTooltip:Show()
 end
 

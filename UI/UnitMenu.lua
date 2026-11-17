@@ -33,17 +33,17 @@ local function addToMenu(_, root, ctx)
 	if not name or ns.isMe(name, realm) then return end
 	local L = ns.L
 	root:CreateDivider()
-	root:CreateTitle(L["Lista Negra"])
+	root:CreateTitle(L["Blacklist"])
 	for _, id in ipairs(ns.ORDER) do
 		local e, k = ns.find(id, name, realm)
 		local label = ns.LISTS[id].label
 		if e then
-			root:CreateButton(L["Editar en %s"]:format(label), function()
+			root:CreateButton(L["Edit in %s"]:format(label), function()
 				later(function() ns.openEditor({ mode = "edit", list = id, key = k }) end)
 			end)
-			root:CreateButton(L["Quitar de %s"]:format(label), function() ns.remove(id, k) end)
+			root:CreateButton(L["Remove from %s"]:format(label), function() ns.remove(id, k) end)
 		else
-			root:CreateButton(L["Añadir a %s"]:format(label), function()
+			root:CreateButton(L["Add to %s"]:format(label), function()
 				later(function() ns.promptAdd(id, name, realm, nil, info) end)
 			end)
 		end

@@ -1,0 +1,25 @@
+# Builds the add-on zip and uploads it to CurseForge and GitHub Releases when a version tag is pushed.
+# Needs the repository secret CF_API_KEY and "## X-Curse-Project-ID: <id>" in ListaNegra.toc.
+# See RELEASING.md.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "[0-9]*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: BigWigsMods/packager@v2

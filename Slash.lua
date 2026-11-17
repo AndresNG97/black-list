@@ -1,23 +1,30 @@
--- Comandos /ln y /listanegra. "/ln ayuda" los lista todos.
+-- Comandos /ln, /blacklist y /listanegra. "/ln help" (o "/ln ayuda") los lista todos.
 
 local _, ns = ...
 local L = ns.L
 
+-- Palabras de los comandos en el idioma del cliente (las inglesas y las españolas funcionan siempre)
+local W = {
+	alerts = L["alerts"], reasons = L["reasons"], remove = L["remove"], search = L["search"],
+	minimap = L["minimap"], test = L["test"], help = L["help"], group = L["group"],
+}
+
 local function help()
-	ns.say(L["comandos:"])
+	ns.say(L["commands:"])
+	local G = W.group
 	local lines = {
-		{ "/ln", L["abre o cierra la ventana"] },
-		{ "/ln avisos", L["ajustes de los avisos"] },
-		{ "/ln pvp", L["añade a tu objetivo a Mundo abierto"] },
-		{ "/ln grupo", L["añade a tu objetivo a Mazmorras / Bandas"] },
-		{ "/ln grupo " .. L["Nombre"] .. " ninja toxico " .. L["nota"], L["añade por nombre con motivos y nota"] },
-		{ "/ln grupo * ninja", L["igual, con tu objetivo"] },
-		{ "/ln motivos", L["palabras de los motivos"] },
-		{ "/ln quitar [pvp|grupo] " .. L["Nombre"], L["quita de una lista (o de las dos)"] },
-		{ "/ln buscar " .. L["Nombre"], L["dice si alguien está en tus listas"] },
-		{ "/ln minimapa", L["muestra u oculta el icono del minimapa"] },
-		{ "/ln prueba [pvp|grupo]", L["enseña un aviso de ejemplo"] },
-		{ "/ln reset", L["vuelve a centrar las ventanas y el aviso"] },
+		{ "/ln", L["opens or closes the window"] },
+		{ "/ln " .. W.alerts, L["alert settings"] },
+		{ "/ln pvp", L["adds your target to Open world"] },
+		{ "/ln " .. G, L["adds your target to Dungeons / Raids"] },
+		{ "/ln " .. G .. " " .. L["Name toxic ninja note"], L["adds by name with reasons and a note"] },
+		{ "/ln " .. G .. " * ninja", L["same, with your target"] },
+		{ "/ln " .. W.reasons, L["reason keywords"] },
+		{ "/ln " .. W.remove .. " [pvp|" .. G .. "] " .. L["Name"], L["removes from one list (or both)"] },
+		{ "/ln " .. W.search .. " " .. L["Name"], L["tells you if someone is on your lists"] },
+		{ "/ln " .. W.minimap, L["shows or hides the minimap icon"] },
+		{ "/ln " .. W.test .. " [pvp|" .. G .. "]", L["shows a sample alert"] },
+		{ "/ln reset", L["re-centers the windows and the alert"] },
 	}
 	for _, l in ipairs(lines) do
 		-- "||" muestra una barra vertical en el chat
@@ -40,13 +47,13 @@ end
 
 local function addCmd(id, rest)
 	local who, more = rest:match("^(%S+)%s*(.-)$")
-	if not who or who == "*" or who:lower() == "objetivo" then
+	if not who or who == "*" or who:lower() == "target" or who:lower() == "objetivo" then
 		local tags, note = parseTags(id, more or "")
 		return ns.addTarget(id, note, tags)
 	end
 	local n, r = ns.splitName(who)
 	n = ns.prettyName(n)
-	if ns.isMe(n, r) then return ns.say(L["No puedes añadirte a ti mismo."]) end
+	if ns.isMe(n, r) then return ns.say(L["You can't add yourself."]) end
 	local tags, note = parseTags(id, more)
 	if note ~= "" or next(tags) then
 		local _, k = ns.add(id, n, r, { reason = note, tags = tags })
@@ -73,24 +80,24 @@ local function removeCmd(rest)
 			end
 		end
 	end
-	if not done then ns.say(L["%s no está en tus listas."], who) end
+	if not done then ns.say(L["%s isn't on your lists."], who) end
 end
 
 local function searchCmd(rest)
 	if rest == "" then return help() end
 	local n, r = ns.splitName(rest)
 	local hits = ns.lookup(n, r)
-	if not hits then return ns.say(L["%s no está en tus listas."], rest) end
+	if not hits then return ns.say(L["%s isn't on your lists."], rest) end
 	for _, id in ipairs(ns.ORDER) do
 		local h = hits[id]
-		if h then ns.say(L["%s está en %s. %s"], ns.coloredName(h.entry), ns.listTag(id), ns.detail(h.entry)) end
+		if h then ns.say(L["%s is on %s. %s"], ns.coloredName(h.entry), ns.listTag(id), ns.detail(h.entry)) end
 	end
 end
 
 local function presetsCmd()
 	for _, id in ipairs(ns.ORDER) do
 		local words = {}
-		for _, p in ipairs(ns.PRESETS[id]) do words[#words + 1] = ("|cffffd100%s|r (%s)"):format(p.key, p.text) end
+		for _, p in ipairs(ns.PRESETS[id]) do words[#words + 1] = ("|cffffd100%s|r (%s)"):format(ns.presetWord(p), p.text) end
 		ns.say("%s: %s", ns.listTag(id), table.concat(words, ", "))
 	end
 end
@@ -98,23 +105,24 @@ end
 local function resetCmd()
 	ns.UI.resetWindows()
 	ns.UI.Banner.reset()
-	ns.say(L["Ventanas y aviso de vuelta en el centro de la pantalla."])
+	ns.say(L["Windows and alert are back in the center of the screen."])
 end
 
 local function minimapCmd()
 	ns.settings.minimap.hide = not ns.settings.minimap.hide
 	ns.fire("SETTINGS_CHANGED")
-	ns.say(ns.settings.minimap.hide and L["Icono del minimapa oculto."] or L["Icono del minimapa visible."])
+	ns.say(ns.settings.minimap.hide and L["Minimap icon hidden."] or L["Minimap icon shown."])
 end
 
 local function alertsCmd() ns.openWindow("avisos") end
 local function testCmd(rest) ns.test(ns.listId(rest) or "pvp") end
 
 local COMMANDS = {
-	avisos = alertsCmd, opciones = alertsCmd, config = alertsCmd,
-	motivos = presetsCmd,
-	quitar = removeCmd, borrar = removeCmd, remove = removeCmd,
-	buscar = searchCmd, ver = searchCmd,
+	alerts = alertsCmd, options = alertsCmd, config = alertsCmd, settings = alertsCmd,
+	avisos = alertsCmd, opciones = alertsCmd,
+	reasons = presetsCmd, motivos = presetsCmd,
+	remove = removeCmd, delete = removeCmd, quitar = removeCmd, borrar = removeCmd,
+	search = searchCmd, find = searchCmd, buscar = searchCmd, ver = searchCmd,
 	minimapa = minimapCmd, minimap = minimapCmd,
 	prueba = testCmd, test = testCmd,
 	reset = resetCmd,
@@ -130,12 +138,13 @@ local function slash(msg)
 	if id then return addCmd(id, rest) end
 	local fn = COMMANDS[cmd]
 	if fn then return fn(rest) end
-	ns.say(L["No conozco «%s»."], cmd)
+	ns.say(L["Unknown command \"%s\"."], cmd)
 	help()
 end
 
 ns.onLoad(function()
 	SLASH_LISTANEGRA1 = "/ln"
-	SLASH_LISTANEGRA2 = "/listanegra"
+	SLASH_LISTANEGRA2 = "/blacklist"
+	SLASH_LISTANEGRA3 = "/listanegra"
 	SlashCmdList.LISTANEGRA = slash
 end)

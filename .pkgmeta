@@ -1,0 +1,10 @@
+package-as: ListaNegra
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - curseforge
+  - RELEASING.md
+  - README.es.md

@@ -9,15 +9,15 @@ local L = ns.L
 -- groupAlerts: si la lista avisa cuando alguien entra en tu grupo o te invita.
 -- En mundo abierto son enemigos: no tiene sentido, solo se avisa al verlos cerca.
 ns.LISTS = {
-	pvp   = { short = L["PvP"],   label = L["Mundo abierto"],      hex = "e5484d", groupAlerts = false },
-	grupo = { short = L["Grupo"], label = L["Mazmorras / Bandas"], hex = "f5a524", groupAlerts = true },
+	pvp   = { short = L["PvP"],   label = L["Open world"],      hex = "e5484d", groupAlerts = false },
+	grupo = { short = L["Group"], label = L["Dungeons / Raids"], hex = "f5a524", groupAlerts = true },
 }
 ns.ORDER = { "pvp", "grupo" }
 
 local ALIAS = {
 	pvp = "pvp", mundo = "pvp", world = "pvp", open = "pvp", ow = "pvp",
 	grupo = "grupo", group = "grupo", raid = "grupo", banda = "grupo", bandas = "grupo",
-	mazmorra = "grupo", mazmorras = "grupo", dungeon = "grupo",
+	mazmorra = "grupo", mazmorras = "grupo", dungeon = "grupo", dungeons = "grupo", raids = "grupo",
 }
 function ns.listId(word) return type(word) == "string" and ALIAS[word:lower()] or nil end
 
@@ -27,25 +27,25 @@ function ns.listId(word) return type(word) == "string" and ALIAS[word:lower()] o
 ---------------------------------------------------------------------------
 ns.PRESETS = {
 	grupo = {
-		{ key = "ninja",    text = L["Ninja"] },
-		{ key = "needea",   text = L["Needea todo"] },
-		{ key = "abandona", text = L["Abandona el grupo"] },
-		{ key = "toxico",   text = L["Tóxico / insulta"] },
-		{ key = "afk",      text = L["AFK / se deja llevar"] },
-		{ key = "rol",      text = L["No hace su rol"] },
-		{ key = "wipes",    text = L["Provoca wipes"] },
-		{ key = "tirones",  text = L["Tira bichos sin control"] },
-		{ key = "estafa",   text = L["Estafador"] },
-		{ key = "bot",      text = L["Bot / tramposo"] },
+		{ key = "ninja",    word = "ninja",     text = L["Ninja"] },
+		{ key = "needea",   word = "needer",    text = L["Needs on everything"] },
+		{ key = "abandona", word = "leaver",    text = L["Leaves the group"] },
+		{ key = "toxico",   word = "toxic",     text = L["Toxic / insults"] },
+		{ key = "afk",      word = "afk",       text = L["AFK / leeches"] },
+		{ key = "rol",      word = "role",      text = L["Doesn't do their role"] },
+		{ key = "wipes",    word = "wiper",     text = L["Causes wipes"] },
+		{ key = "tirones",  word = "puller",    text = L["Pulls recklessly"] },
+		{ key = "estafa",   word = "scammer",   text = L["Scammer"] },
+		{ key = "bot",      word = "bot",       text = L["Bot / cheater"] },
 	},
 	pvp = {
-		{ key = "campea",    text = L["Campea tu cadáver"] },
-		{ key = "ganker",    text = L["Mata a niveles bajos"] },
-		{ key = "misiones",  text = L["Ataca mientras haces misiones"] },
-		{ key = "abusa",     text = L["Va en grupo contra uno"] },
-		{ key = "hermandad", text = L["Hermandad enemiga"] },
-		{ key = "revancha",  text = L["Revancha pendiente"] },
-		{ key = "tramposo",  text = L["Tramposo / bot"] },
+		{ key = "campea",    word = "camper",    text = L["Camps your corpse"] },
+		{ key = "ganker",    word = "ganker",    text = L["Kills low levels"] },
+		{ key = "misiones",  word = "questing",  text = L["Attacks you while questing"] },
+		{ key = "abusa",     word = "zerg",      text = L["Gangs up on solo players"] },
+		{ key = "hermandad", word = "guild",     text = L["Enemy guild"] },
+		{ key = "revancha",  word = "revenge",   text = L["Revenge pending"] },
+		{ key = "tramposo",  word = "cheater",   text = L["Cheater / bot"] },
 	},
 }
 
@@ -58,34 +58,37 @@ function ns.presetKey(id, word)
 	if type(word) ~= "string" then return end
 	local w = word:gsub("[\195][\128-\191]", UNACCENT):lower()
 	for _, p in ipairs(ns.PRESETS[id] or {}) do
-		if p.key == w then return p.key end
+		if p.key == w or p.word == w then return p.key end
 	end
 end
+
+-- Palabra para escribir el motivo en /ln: la inglesa, o la clave española en clientes en español
+function ns.presetWord(p) return ns.SPANISH and p.key or p.word end
 
 ---------------------------------------------------------------------------
 -- Opciones de los avisos (las claves se guardan en los ajustes)
 ---------------------------------------------------------------------------
 ns.ICON_NAMES = {
-	L["Estrella"], L["Círculo"], L["Diamante"], L["Triángulo"], L["Luna"], L["Cuadrado"], L["Cruz"], L["Calavera"],
+	L["Star"], L["Circle"], L["Diamond"], L["Triangle"], L["Moon"], L["Square"], L["Cross"], L["Skull"],
 }
 
 ns.SOUNDS = {
-	{ key = "RAID_WARNING", text = L["Alerta de banda"], id = 8959 },
-	{ key = "READY_CHECK", text = L["Comprobar listos"], id = 8960 },
-	{ key = "ALARM_CLOCK_WARNING_3", text = L["Alarma"], id = 12889 },
-	{ key = "UI_RAID_BOSS_WHISPER_WARNING", text = L["Aviso de jefe"], id = 37666 },
-	{ key = "MAP_PING", text = L["Señal de mapa"], id = 3175 },
-	{ key = "none", text = L["Sin sonido"] },
+	{ key = "RAID_WARNING", text = L["Raid warning"], id = 8959 },
+	{ key = "READY_CHECK", text = L["Ready check"], id = 8960 },
+	{ key = "ALARM_CLOCK_WARNING_3", text = L["Alarm clock"], id = 12889 },
+	{ key = "UI_RAID_BOSS_WHISPER_WARNING", text = L["Boss whisper"], id = 37666 },
+	{ key = "MAP_PING", text = L["Map ping"], id = 3175 },
+	{ key = "none", text = L["No sound"] },
 }
 
 ns.COLORS = {
-	{ key = "rojo", text = L["Rojo"], hex = "e5484d" },
-	{ key = "naranja", text = L["Naranja"], hex = "f5a524" },
-	{ key = "amarillo", text = L["Amarillo"], hex = "ffd100" },
-	{ key = "morado", text = L["Morado"], hex = "a78bfa" },
-	{ key = "azul", text = L["Azul"], hex = "4ea8ff" },
-	{ key = "verde", text = L["Verde"], hex = "46c37b" },
-	{ key = "blanco", text = L["Blanco"], hex = "ffffff" },
+	{ key = "rojo", text = L["Red"], hex = "e5484d" },
+	{ key = "naranja", text = L["Orange"], hex = "f5a524" },
+	{ key = "amarillo", text = L["Yellow"], hex = "ffd100" },
+	{ key = "morado", text = L["Purple"], hex = "a78bfa" },
+	{ key = "azul", text = L["Blue"], hex = "4ea8ff" },
+	{ key = "verde", text = L["Green"], hex = "46c37b" },
+	{ key = "blanco", text = L["White"], hex = "ffffff" },
 }
 
 function ns.colorHex(key)

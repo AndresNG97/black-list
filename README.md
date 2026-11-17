@@ -1,85 +1,105 @@
-# Lista Negra
+# ListaNegra — Player Blacklist
 
-Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores y te avisa cuando te los cruzas.
+An add-on for **World of Warcraft: Forever** that keeps blacklists of players and warns you when you run into them.
 
-- **Mundo abierto (PvP):** quien te campea, te gankea o te ataca mientras haces misiones. Al verlo cerca, le pone una calavera encima y te avisa en pantalla con los motivos y cuántas veces te ha matado.
-- **Mazmorras / Bandas:** ninjas, gente tóxica, los que abandonan... Te avisa si entran en tu grupo o te invitan.
+*[Leer en español](README.es.md)*
 
-## Funciones
+- **Open world (PvP):** the people who camp you, gank you or jump you while you quest. When one of them is nearby, it puts a skull over their head and shows an alert with your reasons and how many times they've killed you.
+- **Dungeons / Raids:** ninjas, toxic players, leavers... It warns you when one of them joins your group or invites you.
 
-- Dos listas con **motivos predeterminados** (Ninja, Needea todo, Abandona el grupo, Campea tu cadáver, Mata a niveles bajos...) y una nota libre.
-- **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si entra en tu grupo o te invita), cómo (aviso en pantalla, chat, icono sobre la placa, marca de banda), icono, sonido, color, duración y cada cuánto se repite.
-- **Aviso en pantalla** que puedes mover y cambiar de tamaño.
-- **Al morir**, te propone añadir al jugador enemigo que parece haberte matado y cuenta las muertes.
-- **Clic derecho** en retratos y nombres del chat para añadir, editar o quitar.
-- **Tooltip** con la lista y los motivos al pasar el ratón por encima de alguien listado.
-- **Icono en el minimapa** (clic: listas · clic derecho: avisos · arrastrar: mover).
+## Features
 
-## Instalación
+- Two lists with **preset reasons** (Ninja, Needs on everything, Leaves the group, Camps your corpse, Kills low levels...) plus a free-text note.
+- **Alerts you set up per list:** when to alert (when nearby; for Dungeons / Raids also when they join your group or invite you), how (on-screen alert, chat, nameplate icon, raid marker), icon, sound, color, duration and how often it repeats.
+- **On-screen alert** you can move and resize.
+- **When you die**, it offers to add the enemy player who seems to have killed you, and counts the kills.
+- **Right-click** on portraits and chat names to add, edit or remove.
+- **Tooltip** shows the list and the reasons when you mouse over someone listed.
+- **Minimap icon** (click: lists · right-click: alerts · drag: move).
+- **English and Spanish.** The language follows your game client.
 
-1. Descarga el repositorio (**Code → Download ZIP**) y descomprímelo.
-2. **Cambia el nombre de la carpeta a `ListaNegra`.** El juego solo carga el add-on si la carpeta se llama igual que el archivo `ListaNegra.toc`; al descargarlo de GitHub se llama `black-list` o `black-list-main`.
-3. Muévela a `World of Warcraft\_forever_\Interface\AddOns\`.
-4. Cierra y vuelve a abrir el juego, y activa **ListaNegra** en la lista de AddOns de la pantalla de personajes.
+## Installation
 
-## Comandos
+**From CurseForge:** install it with the CurseForge app, or download the file and follow step 3.
 
-| Comando | Qué hace |
+**From GitHub:**
+
+1. Download the repository (**Code → Download ZIP**) and unzip it.
+2. **Rename the folder to `ListaNegra`.** The game only loads the add-on if the folder has the same name as `ListaNegra.toc`. A GitHub download is called `black-list` or `black-list-main`.
+3. Move it to `World of Warcraft\_forever_\Interface\AddOns\`.
+4. Restart the game and enable **ListaNegra** in the AddOns list on the character screen.
+
+## Commands
+
+`/ln`, `/blacklist` and `/listanegra` all work.
+
+| Command | What it does |
 |---|---|
-| `/ln` | Abre o cierra la ventana |
-| `/ln avisos` | Ajustes de los avisos |
-| `/ln pvp` · `/ln grupo` | Añade a tu objetivo a esa lista |
-| `/ln grupo Nombre ninja toxico nota libre` | Añade por nombre con motivos y nota |
-| `/ln grupo * ninja` | Igual, con tu objetivo |
-| `/ln motivos` | Palabras de los motivos |
-| `/ln quitar [pvp o grupo] Nombre` | Quita de una lista (o de las dos) |
-| `/ln buscar Nombre` | Dice si alguien está en tus listas |
-| `/ln minimapa` | Muestra u oculta el icono del minimapa |
-| `/ln prueba [pvp o grupo]` | Enseña un aviso de ejemplo |
-| `/ln reset` | Vuelve a centrar las ventanas y el aviso |
-| `/ln ayuda` | Lista todos los comandos |
+| `/ln` | Opens or closes the window |
+| `/ln alerts` | Alert settings |
+| `/ln pvp` · `/ln group` | Adds your target to that list |
+| `/ln group Name toxic ninja free note` | Adds by name with reasons and a note |
+| `/ln group * ninja` | Same, with your target |
+| `/ln reasons` | Keywords for the reasons |
+| `/ln remove [pvp or group] Name` | Removes from one list (or both) |
+| `/ln search Name` | Tells you if someone is on your lists |
+| `/ln minimap` | Shows or hides the minimap icon |
+| `/ln test [pvp or group]` | Shows a sample alert |
+| `/ln reset` | Re-centers the windows and the alert |
+| `/ln help` | Lists every command |
 
-También aparece en **Opciones → AddOns → Lista Negra**, con accesos a las listas y a los ajustes.
+The Spanish commands (`avisos`, `motivos`, `quitar`, `buscar`, `minimapa`, `prueba`, `ayuda`) also work in any language.
 
-## Limitaciones de WoW: Forever
+It also shows up in **Options → AddOns → Blacklist**, with shortcuts to the lists and the settings.
 
-WoW: Forever usa el motor de Midnight, con restricciones para los add-ons:
+## WoW: Forever limitations
 
-- **El registro de combate no está disponible.** "Quién te ha matado" se deduce del jugador enemigo que te tenía en el objetivo en los últimos segundos, por eso pregunta antes de añadirlo.
-- **En instancias, campos de batalla y arenas** el juego puede ocultar la identidad de los jugadores; ahí no se les reconoce.
-- **La detección cercana usa las placas de nombre:** actívalas para enemigos (tecla V). Sin ellas solo se detecta al seleccionar a alguien o pasarle el ratón por encima.
-- Si el juego no deja poner **marcas de banda**, el add-on las desactiva solo y sigue usando su icono propio sobre la placa.
+WoW: Forever runs on the Midnight engine, which restricts add-ons:
 
-## Estructura del código
+- **The combat log isn't available.** "Who killed you" is worked out from the enemy player who had you targeted in the last few seconds, so it asks before adding them.
+- **In instances, battlegrounds and arenas** the game can hide players' identities. They aren't recognized there.
+- **Nearby detection uses nameplates:** turn on enemy nameplates (V key). Without them, people are only detected when you target them or mouse over them.
+- If the game doesn't allow **raid markers**, the add-on turns them off by itself and keeps using its own nameplate icon.
+
+## Translating
+
+Every on-screen text goes through `L["..."]`, and the key is the English text. To add a language, copy `Locales/esES.lua`, change the locale check at the top and translate the right-hand side. Add the file to `ListaNegra.toc` right after `Locales\esES.lua`.
+
+## Code layout
 
 ```
-Core/        datos y lógica, sin interfaz
-  Util         mensajes, lecturas seguras, eventos, avisos internos y arranque
-  Locale       tabla L[] con todos los textos (para traducir)
-  Data         listas, motivos, iconos, sonidos y colores
-  Settings     datos guardados, valores por defecto y migraciones
-  Names        nombres, reinos e identidad de unidades
-  Store        añadir, quitar, buscar y registrar cuándo se ve a alguien
-  Format       textos para el chat y las ventanas
-Detection/   qué pasa en el juego
-  Notify       sonido, aviso en pantalla, chat y espera entre avisos
-  Plates       icono sobre la placa de nombre y marca de banda
-  Nearby       gente cerca (placas, objetivo, ratón)
-  Group        grupo e invitaciones
-  Killer       quién te ha matado
-UI/          interfaz
-  Theme        colores, tipografías y fondos planos
-  Widgets      ventana, botones, interruptores, desplegables, campos, pestañas, etiquetas
-  Banner       aviso en pantalla
-  Editor       ventana de añadir / editar
-  ListPage     página de cada lista
-  SettingsPage página de ajustes
-  MainWindow   ventana principal y pestañas
-  Options      entrada en Opciones → AddOns
-  UnitMenu     clic derecho en retratos y chat
-  Tooltip      líneas en el tooltip del jugador
-  Minimap      botón del minimapa
-Slash.lua    comandos /ln
+Core/        data and logic, no UI
+  Util         chat messages, safe reads, events, internal signals and startup
+  Locale       L[] table with every text
+  Data         lists, reasons, icons, sounds and colors
+  Settings     saved data, defaults and migrations
+  Names        names, realms and unit identity
+  Store        add, remove, find and record when someone is seen
+  Format       text for chat and windows
+Locales/     translations (esES: Spanish for Spain and Latin America)
+Detection/   what happens in the game
+  Notify       sound, on-screen alert, chat and alert cooldown
+  Plates       nameplate icon and raid marker
+  Nearby       people nearby (nameplates, target, mouseover)
+  Group        group and invites
+  Killer       who killed you
+UI/          interface
+  Theme        colors, fonts and flat backgrounds
+  Widgets      window, buttons, toggles, dropdowns, inputs, tabs, chips
+  Banner       on-screen alert
+  Editor       add / edit window
+  ListPage     page for each list
+  SettingsPage settings page
+  MainWindow   main window and tabs
+  Options      entry in Options → AddOns
+  UnitMenu     right-click on portraits and chat
+  Tooltip      lines in the player tooltip
+  Minimap      minimap button
+Slash.lua    /ln commands
 ```
 
-Los módulos se comunican con avisos internos (`LISTS_CHANGED`, `SETTINGS_CHANGED`, `SIGHTING`) en lugar de llamarse directamente.
+Modules talk to each other through internal signals (`LISTS_CHANGED`, `SETTINGS_CHANGED`, `SIGHTING`) instead of calling each other directly.
+
+## License
+
+[MIT](LICENSE)

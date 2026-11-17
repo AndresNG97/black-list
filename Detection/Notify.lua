@@ -52,5 +52,5 @@ function ns.test(id)
 		kills = id == "pvp" and 3 or 0,
 		tags = id == "pvp" and { campea = true } or { ninja = true },
 	}
-	ns.notify(id, sample, id == "pvp" and ns.L["está cerca"] or ns.L["está en tu grupo"])
+	ns.notify(id, sample, id == "pvp" and ns.L["is nearby"] or ns.L["is in your group"])
 end

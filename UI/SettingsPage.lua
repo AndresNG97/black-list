@@ -27,32 +27,32 @@ for i = 1, 8 do ICONS[i] = { value = i, text = ns.icon(i, 14) .. "  " .. ns.ICON
 for i, s in ipairs(ns.SOUNDS) do SOUNDS[i] = { value = s.key, text = s.text } end
 for i, c in ipairs(ns.COLORS) do COLORS[i] = { value = c.key, text = "|cff" .. c.hex .. c.text .. "|r" } end
 local DURATIONS = {
-	{ value = 3, text = L["3 segundos"] }, { value = 5, text = L["5 segundos"] }, { value = 8, text = L["8 segundos"] },
-	{ value = 12, text = L["12 segundos"] }, { value = 20, text = L["20 segundos"] },
+	{ value = 3, text = L["3 seconds"] }, { value = 5, text = L["5 seconds"] }, { value = 8, text = L["8 seconds"] },
+	{ value = 12, text = L["12 seconds"] }, { value = 20, text = L["20 seconds"] },
 }
 local COOLDOWNS = {
-	{ value = 30, text = L["30 segundos"] }, { value = 60, text = L["1 minuto"] }, { value = 120, text = L["2 minutos"] },
-	{ value = 300, text = L["5 minutos"] }, { value = 600, text = L["10 minutos"] }, { value = 1800, text = L["30 minutos"] },
+	{ value = 30, text = L["30 seconds"] }, { value = 60, text = L["1 minute"] }, { value = 120, text = L["2 minutes"] },
+	{ value = 300, text = L["5 minutes"] }, { value = 600, text = L["10 minutes"] }, { value = 1800, text = L["30 minutes"] },
 }
 local SCALES = {
-	{ value = 0.75, text = L["Pequeño (75 %)"] }, { value = 1, text = L["Normal (100 %)"] },
-	{ value = 1.25, text = L["Grande (125 %)"] }, { value = 1.5, text = L["Muy grande (150 %)"] },
+	{ value = 0.75, text = L["Small (75%)"] }, { value = 1, text = L["Normal (100%)"] },
+	{ value = 1.25, text = L["Large (125%)"] }, { value = 1.5, text = L["Huge (150%)"] },
 }
 local WINDOW_SCALES = {
-	{ value = 0.85, text = L["Pequeño (85 %)"] }, { value = 1, text = L["Normal (100 %)"] },
-	{ value = 1.15, text = L["Grande (115 %)"] }, { value = 1.3, text = L["Muy grande (130 %)"] },
+	{ value = 0.85, text = L["Small (85%)"] }, { value = 1, text = L["Normal (100%)"] },
+	{ value = 1.15, text = L["Large (115%)"] }, { value = 1.3, text = L["Huge (130%)"] },
 }
 
 local WHEN = {
-	{ "nearby", L["Al verlo cerca"], L["Cuando aparece su placa de nombre, lo seleccionas o le pasas el ratón por encima."] },
-	{ "inGroup", L["Si está en tu grupo"], L["Cuando entra en tu grupo o banda, o entras tú en el suyo."] },
-	{ "invite", L["Si te invita a un grupo"], L["Cuando te llega una invitación suya."] },
+	{ "nearby", L["When nearby"], L["When their nameplate shows up, you target them or you mouse over them."] },
+	{ "inGroup", L["When in your group"], L["When they join your party or raid, or you join theirs."] },
+	{ "invite", L["When they invite you"], L["When you get a group invite from them."] },
 }
 local HOW = {
-	{ "screen", L["Aviso en pantalla"], L["Tarjeta en el centro de la pantalla con su nombre y los motivos."] },
-	{ "chat", L["Mensaje en el chat"], L["Escribe el aviso en tu ventana de chat. Solo lo ves tú."] },
-	{ "plateIcon", L["Icono sobre su placa"], L["Dibuja el icono elegido encima de su placa de nombre. Solo lo ves tú. Necesita las placas de nombre activadas (tecla V)."] },
-	{ "raidMark", L["Marca de banda"], L["Le pone la marca de banda con el icono elegido. La ve también tu grupo. Nunca dentro de instancias, para no pisar las marcas del líder."] },
+	{ "screen", L["On-screen alert"], L["Card in the middle of the screen with their name and reasons."] },
+	{ "chat", L["Chat message"], L["Prints the alert in your chat window. Only you see it."] },
+	{ "plateIcon", L["Nameplate icon"], L["Draws the chosen icon above their nameplate. Only you see it. Needs nameplates turned on (V key)."] },
+	{ "raidMark", L["Raid marker"], L["Puts the chosen raid marker on them. Your group sees it too. Never inside instances, so it doesn't override the leader's markers."] },
 }
 
 ---------------------------------------------------------------------------
@@ -81,9 +81,9 @@ local function listCard(parent, id, x)
 	local icon = card:CreateTexture(nil, "ARTWORK")
 	icon:SetSize(20, 20)
 	icon:SetPoint("TOPLEFT", PAD, -14)
-	local test = UI.Button(card, L["Probar"], "secondary", nil, 24, function() ns.test(id) end)
+	local test = UI.Button(card, L["Test"], "secondary", nil, 24, function() ns.test(id) end)
 	test:SetPoint("TOPRIGHT", -PAD, -12)
-	test.tip = L["Enseña un aviso de ejemplo con estos ajustes."]
+	test.tip = L["Shows a sample alert with these settings."]
 	local title = UI.text(card, 15, C.text, true)
 	title:SetPoint("LEFT", icon, "RIGHT", 8, 0)
 	title:SetPoint("RIGHT", test, "LEFT", -8, 0)
@@ -112,7 +112,7 @@ local function listCard(parent, id, x)
 		y = y - 28
 	end
 
-	section(L["Cuándo avisar"])
+	section(L["When to alert"])
 	if groupAlerts then
 		for _, opt in ipairs(WHEN) do toggle(opt) end
 	else
@@ -122,26 +122,26 @@ local function listCard(parent, id, x)
 		note:SetPoint("TOPLEFT", PAD, y - 4)
 		note:SetPoint("TOPRIGHT", -PAD, y - 4)
 		note:SetWordWrap(true)
-		note:SetText(L["En mundo abierto son enemigos: no se avisa por grupo ni por invitaciones."])
+		note:SetText(L["In the open world they're enemies: no group or invite alerts."])
 		y = y - 48
 	end
 	y = y - 6
-	section(L["Cómo avisar"])
+	section(L["How to alert"])
 	toggle(HOW[1], anyAlert)
 	toggle(HOW[2], anyAlert)
 	toggle(HOW[3])
 	toggle(HOW[4])
 	y = y - 6
-	section(L["Estilo"])
+	section(L["Style"])
 	local c = cfg
-	dropdown(L["Icono"], L["Icono del aviso, de la placa de nombre y de la marca de banda."], ICONS, "icon",
+	dropdown(L["Icon"], L["Icon for the alert, the nameplate and the raid marker."], ICONS, "icon",
 		function() return c().screen or c().chat or c().plateIcon or c().raidMark end)
-	dropdown(L["Sonido"], L["Suena con cada aviso. Al elegirlo lo oyes."], SOUNDS, "sound", anyAlert, ns.playSound)
-	dropdown(L["Color"], L["Color del aviso en pantalla y del texto en el chat."], COLORS, "color",
+	dropdown(L["Sound"], L["Plays with every alert. You hear it when you pick it."], SOUNDS, "sound", anyAlert, ns.playSound)
+	dropdown(L["Color"], L["Color of the on-screen alert and the chat text."], COLORS, "color",
 		function() return anyAlert() and (c().screen or c().chat) end)
-	dropdown(L["Duración en pantalla"], L["Cuánto tiempo se queda el aviso en pantalla."], DURATIONS, "duration",
+	dropdown(L["Time on screen"], L["How long the alert stays on screen."], DURATIONS, "duration",
 		function() return anyAlert() and c().screen end)
-	dropdown(L["Repetir aviso cada"], L["Tiempo mínimo entre dos avisos de la misma persona cuando la ves cerca."], COOLDOWNS,
+	dropdown(L["Repeat alert every"], L["Minimum time between two alerts for the same person when they're nearby."], COOLDOWNS,
 		"cooldown", function() return c().nearby end)
 	return card
 end
@@ -155,39 +155,39 @@ local function generalCard(parent)
 	card:SetSize(CARD_W * 2 + 16, 104)
 	card:SetPoint("TOPLEFT", 16, -452)
 
-	local reset = UI.Button(card, L["Posición inicial"], "ghost", nil, 24, function() UI.Banner.reset() end)
+	local reset = UI.Button(card, L["Reset position"], "ghost", nil, 24, function() UI.Banner.reset() end)
 	reset:SetPoint("TOPRIGHT", -PAD, -10)
-	reset.tip = L["Devuelve el aviso a su sitio, arriba en el centro."]
-	local move = UI.Button(card, L["Mover aviso"], "secondary", 120, 24, function()
+	reset.tip = L["Puts the alert back in its default spot, top center."]
+	local move = UI.Button(card, L["Move alert"], "secondary", 120, 24, function()
 		UI.Banner.setUnlocked(not UI.Banner.isUnlocked())
 		Page.refresh()
 	end)
 	move:SetPoint("RIGHT", reset, "LEFT", -8, 0)
-	move.tip = L["Muestra el aviso para que lo arrastres donde quieras. Vuelve a pulsar para fijarlo."]
-	track({ refresh = function() move:SetLabel(UI.Banner.isUnlocked() and L["Fijar aviso"] or L["Mover aviso"]) end })
+	move.tip = L["Shows the alert so you can drag it wherever you like. Click again to lock it."]
+	track({ refresh = function() move:SetLabel(UI.Banner.isUnlocked() and L["Lock alert"] or L["Move alert"]) end })
 
 	local title = UI.text(card, 15, C.text, true)
 	title:SetPoint("TOPLEFT", PAD, -14)
 	title:SetText(L["General"])
 
-	local killer = track(UI.Toggle(card, L["Preguntar al morir quién me mató"],
-		L["Al morir, te propone añadir a la lista de mundo abierto al jugador enemigo que parece haberte matado."],
+	local killer = track(UI.Toggle(card, L["Ask who killed me when I die"],
+		L["When you die, offers to add the enemy player who seems to have killed you to the open world list."],
 		function() return S().killerPrompt end, function(v) S().killerPrompt = v; changed() end, INNER))
 	killer:SetPoint("TOPLEFT", PAD, -42)
 
-	local minimap = track(UI.Toggle(card, L["Icono en el minimapa"],
-		L["Botón de Lista Negra en el borde del minimapa. Arrástralo para moverlo."],
+	local minimap = track(UI.Toggle(card, L["Minimap icon"],
+		L["Blacklist button on the edge of the minimap. Drag it to move it."],
 		function() return not S().minimap.hide end, function(v) S().minimap.hide = not v; changed() end, INNER))
 	minimap:SetPoint("TOPLEFT", CARD_W + 16 + PAD, -42)
 
-	local scale = track(UI.Dropdown(card, L["Tamaño del aviso"], SCALES,
+	local scale = track(UI.Dropdown(card, L["Alert size"], SCALES,
 		function() return S().alertScale end, function(v) S().alertScale = v; changed() end, INNER, 170))
-	scale.tip = L["Tamaño del aviso en pantalla."]
+	scale.tip = L["Size of the on-screen alert."]
 	scale:SetPoint("TOPLEFT", PAD, -70)
 
-	local wscale = track(UI.Dropdown(card, L["Tamaño de las ventanas"], WINDOW_SCALES,
+	local wscale = track(UI.Dropdown(card, L["Window size"], WINDOW_SCALES,
 		function() return S().windowScale end, function(v) S().windowScale = v; changed() end, INNER, 170))
-	wscale.tip = L["Tamaño de esta ventana y de la de añadir. Si no caben en tu pantalla se reducen solas."]
+	wscale.tip = L["Size of this window and the add window. They shrink on their own if they don't fit your screen."]
 	wscale:SetPoint("TOPLEFT", CARD_W + 16 + PAD, -70)
 end
 

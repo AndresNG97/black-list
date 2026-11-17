@@ -13,10 +13,10 @@ local ROW_H = 58
 local NAME_MAX = 280 -- ancho máximo del nombre; lo que sobre se recorta con "..."
 
 local SORTS = {
-	{ value = "seen", text = L["Visto hace menos"] },
-	{ value = "added", text = L["Añadido hace menos"] },
-	{ value = "kills", text = L["Más muertes"] },
-	{ value = "name", text = L["Nombre (A-Z)"] },
+	{ value = "seen", text = L["Recently seen"] },
+	{ value = "added", text = L["Recently added"] },
+	{ value = "kills", text = L["Most kills"] },
+	{ value = "name", text = L["Name (A-Z)"] },
 }
 local SORTERS = {
 	seen = function(a, b) return (a.e.lastSeen or a.e.added or 0) > (b.e.lastSeen or b.e.added or 0) end,
@@ -45,7 +45,7 @@ end
 local function other(id) return id == "pvp" and "grupo" or "pvp" end
 
 local function confirmRemove(data)
-	UI.confirm(L["Quitar de la lista"], L["¿Quitar a %s de %s?"]:format(ns.coloredName(data.e), ns.listTag(data.list)), L["Quitar"],
+	UI.confirm(L["Remove from list"], L["Remove %s from %s?"]:format(ns.coloredName(data.e), ns.listTag(data.list)), L["Remove"],
 		function() ns.remove(data.list, data.k) end)
 end
 
@@ -54,13 +54,13 @@ local function rowMenu(row)
 	if not (data and MenuUtil and MenuUtil.CreateContextMenu) then return end
 	MenuUtil.CreateContextMenu(row, function(_, root)
 		root:CreateTitle(ns.fullName(data.e))
-		root:CreateButton(L["Editar motivos y nota"], function() ns.openEditor({ mode = "edit", list = data.list, key = data.k }) end)
+		root:CreateButton(L["Edit reasons and note"], function() ns.openEditor({ mode = "edit", list = data.list, key = data.k }) end)
 		local to = other(data.list)
 		if not ns.entry(to, data.k) then
-			root:CreateButton(L["Mover a %s"]:format(ns.LISTS[to].label), function() ns.move(data.list, to, data.k) end)
+			root:CreateButton(L["Move to %s"]:format(ns.LISTS[to].label), function() ns.move(data.list, to, data.k) end)
 		end
 		root:CreateDivider()
-		root:CreateButton("|cffe5484d" .. L["Quitar de la lista"] .. "|r", function() confirmRemove(data) end)
+		root:CreateButton("|cffe5484d" .. L["Remove from list"] .. "|r", function() confirmRemove(data) end)
 	end)
 end
 
@@ -73,14 +73,14 @@ local function rowTooltip(row)
 	local reason = ns.reasonText(e)
 	if reason ~= "" then GameTooltip:AddLine(reason, 1, 1, 1, true) end
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine(L["Añadido"], date("%d/%m/%Y", e.added or time()), m[1], m[2], m[3], 1, 1, 1)
-	GameTooltip:AddDoubleLine(L["Visto"], ns.ago(e.lastSeen) .. (e.lastZone and (" · " .. e.lastZone) or ""), m[1], m[2], m[3], 1, 1, 1)
-	GameTooltip:AddDoubleLine(L["Veces visto"], tostring(e.seen or 0), m[1], m[2], m[3], 1, 1, 1)
+	GameTooltip:AddDoubleLine(L["Added"], date(L["%b %d, %Y"], e.added or time()), m[1], m[2], m[3], 1, 1, 1)
+	GameTooltip:AddDoubleLine(L["Seen"], ns.ago(e.lastSeen) .. (e.lastZone and (" · " .. e.lastZone) or ""), m[1], m[2], m[3], 1, 1, 1)
+	GameTooltip:AddDoubleLine(L["Times seen"], tostring(e.seen or 0), m[1], m[2], m[3], 1, 1, 1)
 	if (e.kills or 0) > 0 then
-		GameTooltip:AddDoubleLine(L["Te ha matado"], L["%d (la última %s)"]:format(e.kills, ns.ago(e.lastKill)), m[1], m[2], m[3], 1, 0.35, 0.35)
+		GameTooltip:AddDoubleLine(L["Killed you"], L["%d (last %s)"]:format(e.kills, ns.ago(e.lastKill)), m[1], m[2], m[3], 1, 0.35, 0.35)
 	end
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine(L["Clic: editar · Clic derecho: más opciones"], 0.5, 0.75, 1)
+	GameTooltip:AddLine(L["Click: edit · Right-click: more options"], 0.5, 0.75, 1)
 	GameTooltip:Show()
 end
 
@@ -126,7 +126,7 @@ local function buildRow(row)
 	row.reason:SetPoint("BOTTOMLEFT", 60, 11)
 	row.reason:SetPoint("RIGHT", row.kills, "LEFT", -10, 0)
 
-	row.del = UI.CloseButton(row, 24, L["Quitar de la lista"], function() confirmRemove(row.data) end, C.accentHi)
+	row.del = UI.CloseButton(row, 24, L["Remove from list"], function() confirmRemove(row.data) end, C.accentHi)
 	row.del:SetPoint("RIGHT", -10, 0)
 	row.del:Hide()
 	row.onChildLeave = function(self)
@@ -164,7 +164,7 @@ local function initRow(row, data)
 	row.name:SetWidth(math.min(math.ceil(UI.textWidth(row.name)) + 2, NAME_MAX))
 
 	local meta = {}
-	if e.level then meta[#meta + 1] = L["Nv %d"]:format(e.level) end
+	if e.level then meta[#meta + 1] = L["Lv %d"]:format(e.level) end
 	if e.race then meta[#meta + 1] = e.race end
 	if e.faction then meta[#meta + 1] = ns.factionText(e.faction) end
 	row.meta:SetText(table.concat(meta, " · "))
@@ -174,9 +174,9 @@ local function initRow(row, data)
 	if #tags > 0 then parts[#parts + 1] = ("|cff%s%s|r"):format(hex, table.concat(tags, " · ")) end
 	if e.reason and e.reason ~= "" then parts[#parts + 1] = e.reason end
 	row.reason:SetText(#parts > 0 and table.concat(parts, "   ")
-		or ("|cff%s%s|r"):format(UI.HEX.faint, L["Sin motivo: haz clic para añadirlo"]))
+		or ("|cff%s%s|r"):format(UI.HEX.faint, L["No reason: click to add one"]))
 
-	row.seen:SetText(e.lastSeen and L["visto %s"]:format(ns.ago(e.lastSeen)) or L["sin ver todavía"])
+	row.seen:SetText(e.lastSeen and L["seen %s"]:format(ns.ago(e.lastSeen)) or L["not seen yet"])
 	row.kills:SetText((e.kills or 0) > 0 and (ns.icon(8, 13) .. " " .. e.kills) or "")
 	setHover(row, row:IsMouseOver())
 end
@@ -188,12 +188,12 @@ local function updateAddTarget()
 	if not Page.addTarget then return end
 	local ok = ns.targetIsAddable()
 	Page.addTarget:SetEnabled(ok)
-	Page.addTarget.tip = ok and L["Añade al jugador que tienes seleccionado."]
-		or L["Selecciona a un jugador (que no seas tú) para poder añadirlo."]
+	Page.addTarget.tip = ok and L["Adds the player you have targeted."]
+		or L["Target a player (other than yourself) to add them."]
 end
 
 function Page.build(parent)
-	Page.search = UI.Input(parent, 240, 30, L["Buscar por nombre o motivo..."], true)
+	Page.search = UI.Input(parent, 240, 30, L["Search by name or reason..."], true)
 	Page.search:SetPoint("TOPLEFT", 16, -14)
 	Page.search:HookScript("OnTextChanged", function(self)
 		filter = self:GetText() or ""
@@ -203,15 +203,15 @@ function Page.build(parent)
 	Page.sort = UI.Dropdown(parent, nil, SORTS, function() return ns.settings.sort end,
 		function(v) ns.settings.sort = v; Page.refresh() end, 170, 170)
 	Page.sort:SetPoint("LEFT", Page.search, "RIGHT", 8, 0)
-	Page.sort.tipTitle = L["Ordenar"]
-	Page.sort.tip = L["Cambia el orden de la lista."]
+	Page.sort.tipTitle = L["Sort"]
+	Page.sort.tip = L["Changes the list order."]
 
-	Page.addTarget = UI.Button(parent, L["+ Añadir objetivo"], "primary", nil, 30, function() ns.addTarget(listId) end)
+	Page.addTarget = UI.Button(parent, L["+ Add target"], "primary", nil, 30, function() ns.addTarget(listId) end)
 	Page.addTarget:SetPoint("TOPRIGHT", -16, -14)
-	Page.addName = UI.Button(parent, L["Añadir por nombre"], "secondary", nil, 30,
+	Page.addName = UI.Button(parent, L["Add by name"], "secondary", nil, 30,
 		function() ns.openEditor({ mode = "add", list = listId }) end)
 	Page.addName:SetPoint("RIGHT", Page.addTarget, "LEFT", -8, 0)
-	Page.addName.tip = L["Escribe el nombre de alguien que no tienes delante."]
+	Page.addName.tip = L["Type the name of someone who isn't in front of you."]
 
 	local box = CreateFrame("Frame", nil, parent, "WowScrollBoxList")
 	box:SetPoint("TOPLEFT", 16, -58)
@@ -268,11 +268,11 @@ function Page.refresh(id)
 	if #list == 0 then
 		UI.raidIcon(empty.icon, ns.cfg(listId).icon or 8)
 		if filter ~= "" then
-			empty.title:SetText(L["Sin resultados"])
-			empty.hint:SetText(L["Nadie en %s coincide con «%s»."]:format(ns.LISTS[listId].label, filter))
+			empty.title:SetText(L["No results"])
+			empty.hint:SetText(L["Nobody in %s matches \"%s\"."]:format(ns.LISTS[listId].label, filter))
 		else
-			empty.title:SetText(L["Todavía no hay nadie aquí"])
-			empty.hint:SetText(L["Selecciona a un jugador y pulsa «Añadir objetivo», haz clic derecho en su retrato o en su nombre del chat, o usa «Añadir por nombre»."])
+			empty.title:SetText(L["Nobody here yet"])
+			empty.hint:SetText(L["Target a player and click \"Add target\", right-click their portrait or their name in chat, or use \"Add by name\"."])
 		end
 	end
 end

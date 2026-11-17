@@ -8,14 +8,14 @@ local W
 local current = "pvp"
 
 local function build()
-	W = UI.Window({ name = "ListaNegraFrame", w = 760, h = 660, title = L["Lista Negra"], save = "main" })
+	W = UI.Window({ name = "ListaNegraFrame", w = 760, h = 660, title = L["Blacklist"], save = "main" })
 
 	local items = {}
 	for i, id in ipairs(ns.ORDER) do
-		items[i] = { value = id, tip = id == "pvp" and L["Gente con la que te cruzas en el mundo abierto."]
-			or L["Gente con la que no quieres volver a agruparte."] }
+		items[i] = { value = id, tip = id == "pvp" and L["People you run into in the open world."]
+			or L["People you never want to group with again."] }
 	end
-	items[#items + 1] = { value = "avisos", text = L["Avisos"], tip = L["Cuándo y cómo te avisa cada lista."] }
+	items[#items + 1] = { value = "avisos", text = L["Alerts"], tip = L["When and how each list alerts you."] }
 	W.tabs = UI.Tabs(W, items, function(v)
 		current = v
 		ns.refreshWindow()
@@ -47,7 +47,7 @@ function ns.refreshWindow()
 			UI.HEX.faint, counts[id]))
 	end
 	W.tabs:Select(current)
-	W:SetSubtitle(L["%d en mundo abierto · %d en mazmorras y bandas"]:format(counts.pvp, counts.grupo))
+	W:SetSubtitle(L["%d in open world · %d in dungeons and raids"]:format(counts.pvp, counts.grupo))
 
 	local settings = current == "avisos"
 	W.listPage:SetShown(not settings)
