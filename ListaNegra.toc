@@ -1,0 +1,36 @@
+## Interface: 16001
+## Title: ListaNegra
+## Notes: Listas negras de jugadores: mundo abierto (PvP) y mazmorras/bandas. Iconos y avisos al verlos o agruparte con ellos. /ln
+## Version: 0.3.0
+## SavedVariables: ListaNegraDB
+## IconTexture: Interface\TargetingFrame\UI-RaidTargetingIcon_8
+## AddonCompartmentFunc: ListaNegra_OnCompartmentClick
+
+# Núcleo: datos y lógica, sin interfaz
+Core\Util.lua
+Core\Data.lua
+Core\Settings.lua
+Core\Names.lua
+Core\Store.lua
+Core\Format.lua
+
+# Detección y avisos
+Detection\Notify.lua
+Detection\Plates.lua
+Detection\Nearby.lua
+Detection\Group.lua
+Detection\Killer.lua
+
+# Interfaz
+UI\Theme.lua
+UI\Widgets.lua
+UI\Banner.lua
+UI\Editor.lua
+UI\ListPage.lua
+UI\SettingsPage.lua
+UI\MainWindow.lua
+UI\UnitMenu.lua
+UI\Tooltip.lua
+UI\Minimap.lua
+
+Slash.lua
