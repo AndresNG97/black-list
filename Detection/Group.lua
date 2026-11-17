@@ -1,10 +1,13 @@
--- Grupo e invitaciones: aviso cuando alguien de tus listas entra en tu grupo o te invita.
--- En grupo importa más la lista de mazmorras/bandas, así que va primero.
+-- Grupo e invitaciones: aviso cuando alguien de una lista con groupAlerts (Mazmorras / Bandas)
+-- entra en tu grupo o te invita. La lista de mundo abierto no avisa aquí: son enemigos.
 
 local _, ns = ...
 local isSecret, safe, plain = ns.isSecret, ns.safe, ns.plain
 
-local GROUP_ORDER = { "grupo", "pvp" }
+local GROUP_ORDER = {}
+for _, id in ipairs(ns.ORDER) do
+	if ns.LISTS[id].groupAlerts then GROUP_ORDER[#GROUP_ORDER + 1] = id end
+end
 
 local alerted = {} -- [clave] = true mientras siga en el grupo
 local unreadable = false

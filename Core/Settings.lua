@@ -5,8 +5,8 @@ local _, ns = ...
 
 -- Ajustes por lista: pvp = mundo abierto, grupo = mazmorras y bandas
 local ALERT_DEFAULTS = {
-	pvp = {
-		nearby = true, inGroup = true, invite = true, screen = true, chat = true,
+	pvp = { -- inGroup/invite no se usan en mundo abierto (ver groupAlerts en Data.lua)
+		nearby = true, inGroup = false, invite = false, screen = true, chat = true,
 		plateIcon = true, raidMark = true, icon = 8, sound = "RAID_WARNING", color = "rojo",
 		duration = 5, cooldown = 120,
 	},

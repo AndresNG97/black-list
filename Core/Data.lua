@@ -6,9 +6,11 @@ local L = ns.L
 ---------------------------------------------------------------------------
 -- Listas
 ---------------------------------------------------------------------------
+-- groupAlerts: si la lista avisa cuando alguien entra en tu grupo o te invita.
+-- En mundo abierto son enemigos: no tiene sentido, solo se avisa al verlos cerca.
 ns.LISTS = {
-	pvp   = { short = L["PvP"],   label = L["Mundo abierto"],      hex = "e5484d" },
-	grupo = { short = L["Grupo"], label = L["Mazmorras / Bandas"], hex = "f5a524" },
+	pvp   = { short = L["PvP"],   label = L["Mundo abierto"],      hex = "e5484d", groupAlerts = false },
+	grupo = { short = L["Grupo"], label = L["Mazmorras / Bandas"], hex = "f5a524", groupAlerts = true },
 }
 ns.ORDER = { "pvp", "grupo" }
 

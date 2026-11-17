@@ -8,7 +8,7 @@ Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores
 ## Funciones
 
 - Dos listas con **motivos predeterminados** (Ninja, Needea todo, Abandona el grupo, Campea tu cadáver, Mata a niveles bajos...) y una nota libre.
-- **Avisos configurables por lista:** cuándo avisar (cerca, en tu grupo, invitación), cómo (aviso en pantalla, chat, icono sobre la placa, marca de banda), icono, sonido, color, duración y cada cuánto se repite.
+- **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si entra en tu grupo o te invita), cómo (aviso en pantalla, chat, icono sobre la placa, marca de banda), icono, sonido, color, duración y cada cuánto se repite.
 - **Aviso en pantalla** que puedes mover y cambiar de tamaño.
 - **Al morir**, te propone añadir al jugador enemigo que parece haberte matado y cuenta las muertes.
 - **Clic derecho** en retratos y nombres del chat para añadir, editar o quitar.

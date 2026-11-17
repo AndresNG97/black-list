@@ -63,7 +63,11 @@ local INNER = CARD_W - PAD * 2
 
 local function listCard(parent, id, x)
 	local cfg = function() return ns.cfg(id) end
-	local anyAlert = function() local c = cfg(); return c.nearby or c.inGroup or c.invite end
+	local groupAlerts = ns.LISTS[id].groupAlerts
+	local anyAlert = function()
+		local c = cfg()
+		return c.nearby or (groupAlerts and (c.inGroup or c.invite))
+	end
 	local card = UI.panel(parent, C.panel, C.border)
 	card:SetSize(CARD_W, 426)
 	card:SetPoint("TOPLEFT", x, -14)
@@ -109,7 +113,18 @@ local function listCard(parent, id, x)
 	end
 
 	section(L["Cuándo avisar"])
-	for _, opt in ipairs(WHEN) do toggle(opt) end
+	if groupAlerts then
+		for _, opt in ipairs(WHEN) do toggle(opt) end
+	else
+		-- Mundo abierto: solo "al verlo cerca"; el hueco de las otras dos filas explica por qué
+		toggle(WHEN[1])
+		local note = UI.text(card, 12, C.faint)
+		note:SetPoint("TOPLEFT", PAD, y - 4)
+		note:SetPoint("TOPRIGHT", -PAD, y - 4)
+		note:SetWordWrap(true)
+		note:SetText(L["En mundo abierto son enemigos: no se avisa por grupo ni por invitaciones."])
+		y = y - 48
+	end
 	y = y - 6
 	section(L["Cómo avisar"])
 	toggle(HOW[1], anyAlert)

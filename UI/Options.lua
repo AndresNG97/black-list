@@ -21,7 +21,7 @@ local function build()
 	desc:SetPoint("TOPLEFT", 16, -64)
 	desc:SetPoint("TOPRIGHT", -16, -64)
 	desc:SetWordWrap(true)
-	desc:SetText(L["Guarda listas negras de jugadores (mundo abierto y mazmorras/bandas) y te avisa cuando te los cruzas, se unen a tu grupo o te invitan."])
+	desc:SetText(L["Guarda listas negras de jugadores y te avisa al cruzártelos en el mundo abierto, o cuando alguien de tu lista de mazmorras y bandas se une a tu grupo o te invita."])
 
 	local lists = UI.Button(panel, L["Abrir las listas"], "primary", nil, 30, function() ns.openWindow("pvp") end)
 	lists:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", 0, -16)
