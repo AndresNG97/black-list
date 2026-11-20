@@ -13,6 +13,7 @@ Add-on para **World of Warcraft: Forever** que guarda listas negras de jugadores
 - **Avisos configurables por lista:** cuándo avisar (al verlo cerca; en Mazmorras / Bandas también si está en tu grupo y en las invitaciones, tuyas o suyas), cómo (aviso en pantalla, chat, icono sobre la placa), icono, sonido, color, duración y cada cuánto se repite.
 - **Aviso en pantalla** que puedes mover y cambiar de tamaño.
 - **Al morir**, te propone añadir al jugador enemigo que parece haberte matado y cuenta las muertes.
+- **Historial** con dos listas separadas: quién te ha matado y con quién has ido en grupo, esté en una lista o no. Haz clic en alguien para añadirlo a una lista.
 - **Clic derecho** en retratos y nombres del chat para añadir, editar o quitar.
 - **Tooltip** con la lista y los motivos al pasar el ratón por encima de alguien listado.
 - **Icono en el minimapa** (clic: listas · clic derecho: avisos · arrastrar: mover).
@@ -37,6 +38,7 @@ Valen `/ln`, `/listanegra` y `/blacklist`.
 |---|---|
 | `/ln` | Abre o cierra la ventana |
 | `/ln avisos` | Ajustes de los avisos |
+| `/ln historial` | Quién te ha matado y con quién has ido en grupo |
 | `/ln pvp` · `/ln grupo` | Añade a tu objetivo a esa lista |
 | `/ln grupo Nombre ninja toxico nota libre` | Añade por nombre con motivos y nota |
 | `/ln grupo * ninja` | Igual, con tu objetivo |

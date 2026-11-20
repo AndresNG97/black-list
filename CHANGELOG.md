@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0
+
+- **New History tab**, with two separate lists side by side:
+  - **Killed me**: every enemy player who seems to have killed you, how many times, when and where. They don't need to be on a list.
+  - **Grouped with**: everyone you were in a party or raid with, how many groups together, when and where.
+- Click someone in the history to add them to a list (or edit them if they're already on it). Right-click for both lists and to remove them from the history. Each list has its own Clear button.
+- New `/ln history` (`/ln historial`) opens it.
+- Each history keeps the last 300 people; the oldest are dropped.
+
 ## 1.0.3
 
 - **Fixed the "blocked action" popup on every alert.** WoW Forever (Midnight engine) no longer lets add-ons set raid markers, so the raid marker option is gone. The icon above the nameplate still works.

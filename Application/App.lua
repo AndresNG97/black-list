@@ -7,11 +7,13 @@
 --   killedYou(entry)   killedAgain(entry, kills)
 --   notInGroup()   groupHeader()   groupHidden(unit)   groupMember(shownName, hits)
 --   platesCombat()   platesOn()   platesFailed()   platesHint()
+--
+-- Events sent to ports.events.publish(name): LISTS_CHANGED, SETTINGS_CHANGED, SIGHTING, HISTORY_CHANGED
 
 local _, ns = ...
 local D = ns.Domain
 local Names, Catalog, Entry, Blacklist = D.Names, D.Catalog, D.Entry, D.Blacklist
-local AlertPolicy, KillerGuess, Settings = D.AlertPolicy, D.KillerGuess, D.Settings
+local AlertPolicy, KillerGuess, Settings, History = D.AlertPolicy, D.KillerGuess, D.Settings, D.History
 
 local App = {}
 App.__index = App
@@ -20,11 +22,12 @@ ns.App = App
 local INVITE_DEDUPE = 3       -- seconds: several invite functions can fire for one invite
 local GROUP_DELAY, GROUP_RETRY = 1, 4
 local PLATE_RETRIES = { 0.5, 2 } -- a nameplate can show up before the player's name has loaded
+local REGROUP_GAP = 300       -- seconds: grouped with someone again after a /reload within this time = same group
 
 function App.new(ports)
 	ns.Ports.check(ports)
 	local self = setmetatable({ p = ports }, App)
-	self.alerted, self.lastOut = {}, {}
+	self.alerted, self.lastOut, self.grouped = {}, {}, {}
 	self.guess = KillerGuess.new()
 	return self
 end
@@ -37,6 +40,7 @@ function App:start()
 	self.list = Blacklist.new(db.lists, function(name, realm) return self:key(name, realm) end)
 	if needsKeys then self.list:migrateKeys(p.clock.epoch()) end
 	db.lists = self.list.lists
+	self.history = db.history
 	self.policy = AlertPolicy.new(function(id) return self.s.alerts[id] end)
 	return self
 end
@@ -276,16 +280,19 @@ function App:checkGroup()
 	local p = self.p
 	if not p.party.inGroup() then
 		for k in pairs(self.alerted) do self.alerted[k] = nil end
+		for k in pairs(self.grouped) do self.grouped[k] = nil end
 		return
 	end
 	self.unreadable = false
-	local present = {}
+	local present, members = {}, {}
 	for _, unit in ipairs(p.party.members()) do
 		local name, realm, guid = p.units.identity(unit)
 		if name then
+			local k = self:key(name, realm)
+			members[k] = true
+			self:recordMember(k, name, realm, unit)
 			local hits = self.list:lookup(name, realm, guid)
 			if hits then
-				local k = self:key(name, realm)
 				present[k] = true
 				for id, h in pairs(hits) do self:recordSighting(id, h.entry, name, unit) end
 				if not self.alerted[k] then
@@ -301,6 +308,13 @@ function App:checkGroup()
 	for k in pairs(self.alerted) do
 		if not present[k] then self.alerted[k] = nil end
 	end
+	-- Who is still in the group (someone unreadable right now isn't counted as gone)
+	if not self.unreadable then
+		for k in pairs(self.grouped) do
+			if not members[k] then self.grouped[k] = nil end
+		end
+	end
+	self:historyChanged()
 end
 
 -- Roster changes come in bursts: check once, a second later
@@ -384,6 +398,7 @@ function App:died()
 	local s = self.guess:pick(p.clock.now())
 	self.guess:clear()
 	if not s then return end
+	self:recordKiller(s)
 	local e, k = self.list:find("pvp", s.name, s.realm, s.info.guid)
 	if e then
 		local kills = self:addKill("pvp", k)
@@ -391,4 +406,41 @@ function App:died()
 	elseif self.s.killerPrompt then
 		p.prompt.add("pvp", s.name, s.realm, s.info, { fromKill = true, zone = p.player.zone() })
 	end
+end
+
+---------------------------------------------------------------------------
+-- History: who killed you and who you grouped with (on a list or not)
+---------------------------------------------------------------------------
+function App:historyChanged() self.p.events.publish("HISTORY_CHANGED") end
+
+-- kind: "kills" | "party" -> { { k, e }, ... }, most recent first
+function App:historyEntries(kind) return History.entries(self.history[kind]) end
+function App:historyCount(kind) return History.count(self.history[kind]) end
+function App:historyEntry(kind, k) return self.history[kind][k] end
+
+function App:forget(kind, k)
+	if History.remove(self.history[kind], k) then self:historyChanged() end
+end
+
+function App:clearHistory(kind)
+	History.clear(self.history[kind])
+	self:historyChanged()
+end
+
+-- s: { name, realm, info } from the killer guess
+function App:recordKiller(s)
+	local p = self.p
+	History.note(self.history.kills, self:key(s.name, s.realm), { name = s.name, realm = self:normRealm(s.realm), info = s.info },
+		p.clock.epoch(), p.player.zone())
+	self:historyChanged()
+end
+
+-- A group member: counts as a new group only when they weren't already in it
+function App:recordMember(k, name, realm, unit)
+	local p = self.p
+	local now, r = p.clock.epoch(), self.history.party[k]
+	local counts = not self.grouped[k] and not (r and r.last and now - r.last < REGROUP_GAP)
+	self.grouped[k] = true
+	History.note(self.history.party, k, { name = name, realm = self:normRealm(realm), info = p.units.info(unit) },
+		now, p.player.zone(), counts)
 end

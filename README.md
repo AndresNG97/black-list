@@ -13,6 +13,7 @@ An add-on for **World of Warcraft: Forever** that keeps blacklists of players an
 - **Alerts you set up per list:** when to alert (when nearby; for Dungeons / Raids also when they're in your group and on invites, yours or theirs), how (on-screen alert, chat, nameplate icon), icon, sound, color, duration and how often it repeats.
 - **On-screen alert** you can move and resize.
 - **When you die**, it offers to add the enemy player who seems to have killed you, and counts the kills.
+- **History** with two separate lists: who killed you and who you grouped with, whether they're on a list or not. Click someone to add them to a list.
 - **Right-click** on portraits and chat names to add, edit or remove.
 - **Tooltip** shows the list and the reasons when you mouse over someone listed.
 - **Minimap icon** (click: lists · right-click: alerts · drag: move).
@@ -37,6 +38,7 @@ An add-on for **World of Warcraft: Forever** that keeps blacklists of players an
 |---|---|
 | `/ln` | Opens or closes the window |
 | `/ln alerts` | Alert settings |
+| `/ln history` | Who killed you and who you grouped with |
 | `/ln pvp` · `/ln group` | Adds your target to that list |
 | `/ln group Name toxic ninja free note` | Adds by name with reasons and a note |
 | `/ln group * ninja` | Same, with your target |
@@ -90,10 +92,11 @@ Domain/        the rules, pure Lua: no WoW API (checked automatically)
   Blacklist      the two lists: find, add, remove, move, GUID index, key migration
   AlertPolicy    which list alerts, cooldowns, nameplate icon
   KillerGuess    who killed you (suspects in the last 20 seconds)
+  History        who killed you and who you grouped with: counts, dates, oldest dropped
   Settings       defaults and migrations of the saved data
 Application/   use cases
   Ports          what the application needs from outside (clock, store, units, alerts...)
-  App            every use case: add, remove, seen nearby, group, invites, death, /ln check...
+  App            every use case: add, remove, seen nearby, group, invites, death, history, /ln check...
 Adapters/      the ports on the WoW API, and what calls the use cases
   Runtime        chat, safe reads, game events, internal events, startup
   Text           texts and formatting for chat and windows

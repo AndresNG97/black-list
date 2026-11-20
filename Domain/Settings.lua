@@ -25,8 +25,7 @@ Settings.ALERT_DEFAULTS = {
 }
 
 Settings.GENERAL_DEFAULTS = {
-	killerPrompt = true, -- on death, offer to add whoever seems to have killed you
-	alertScale = 1,      -- size of the on-screen alert
+	killerPrompt = true, -- on death, offer to add whoever seems to have killed you	alertScale = 1,      -- size of the on-screen alert
 	windowScale = 1,     -- size of the windows (shrinks automatically if they don't fit on screen)
 	sort = "seen",       -- sort order of the lists
 }
@@ -74,6 +73,10 @@ function Settings.prepare(db)
 	end
 	fill(tbl(s, "minimap"), { angle = 200, hide = false })
 	tbl(s, "windows") -- window positions
+
+	-- History (1.1.0): who killed you and who you grouped with
+	local history = tbl(db, "history")
+	for _, kind in ipairs(ns.Domain.History.KINDS) do tbl(history, kind) end
 
 	local needsKeys = db.keyVersion ~= Settings.KEY_VERSION
 	db.keyVersion = Settings.KEY_VERSION

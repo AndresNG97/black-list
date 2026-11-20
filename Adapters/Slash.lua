@@ -8,7 +8,7 @@ local L = ns.L
 local W = {
 	alerts = L["alerts"], reasons = L["reasons"], remove = L["remove"], search = L["search"],
 	minimap = L["minimap"], test = L["test"], help = L["help"], group = L["group"], check = L["check"],
-	nameplates = L["nameplates"],
+	nameplates = L["nameplates"], history = L["history"],
 }
 
 local function help()
@@ -17,6 +17,7 @@ local function help()
 	local lines = {
 		{ "/ln", L["opens or closes the window"] },
 		{ "/ln " .. W.alerts, L["alert settings"] },
+		{ "/ln " .. W.history, L["who killed you and who you grouped with"] },
 		{ "/ln pvp", L["adds your target to Open world"] },
 		{ "/ln " .. G, L["adds your target to Dungeons / Raids"] },
 		{ "/ln " .. G .. " " .. L["Name toxic ninja note"], L["adds by name with reasons and a note"] },
@@ -102,11 +103,13 @@ local function minimapCmd()
 end
 
 local function alertsCmd() ns.openWindow("avisos") end
+local function historyCmd() ns.openWindow("historial") end
 local function testCmd(rest) ns.app:test(ns.listId(rest) or "pvp") end
 
 local COMMANDS = {
 	alerts = alertsCmd, options = alertsCmd, config = alertsCmd, settings = alertsCmd,
 	avisos = alertsCmd, opciones = alertsCmd,
+	history = historyCmd, historial = historyCmd,
 	reasons = presetsCmd, motivos = presetsCmd,
 	remove = removeCmd, delete = removeCmd, quitar = removeCmd, borrar = removeCmd,
 	search = searchCmd, find = searchCmd, buscar = searchCmd, ver = searchCmd,

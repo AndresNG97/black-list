@@ -57,7 +57,7 @@ Ports.CONTRACT = {
 		"add",      -- (listId, name, realm, info, ctx): open the add window; ctx = { fromKill, zone }
 	},
 	events = {
-		"publish",  -- (name): "LISTS_CHANGED" | "SETTINGS_CHANGED" | "SIGHTING"
+		"publish",  -- (name): "LISTS_CHANGED" | "SETTINGS_CHANGED" | "SIGHTING" | "HISTORY_CHANGED"
 	},
 }
 

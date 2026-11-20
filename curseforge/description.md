@@ -22,6 +22,7 @@ Ninjas, toxic players, leavers, people who don't do their role... You get warned
 
 - **Preset reasons** for each list (Ninja, Needs on everything, Leaves the group, Camps your corpse, Kills low levels...) plus a free-text note.
 - **Alerts set up per list:** when (nearby, in your group, invites either way), how (on-screen alert, chat, nameplate icon), icon, sound, color, duration and cooldown.
+- **History** with two separate lists: who killed you and who you grouped with, even if they aren't on a list. Click anyone there to blacklist them.
 - **On-screen alert** you can move and resize.
 - **Right-click** on unit portraits and chat names to add, edit or remove someone.
 - **Tooltip** shows the list and reasons when you mouse over a listed player.
@@ -35,6 +36,7 @@ Ninjas, toxic players, leavers, people who don't do their role... You get warned
 |---|---|
 | `/ln` | Open or close the window |
 | `/ln alerts` | Alert settings |
+| `/ln history` | Who killed you and who you grouped with |
 | `/ln pvp` · `/ln group` | Add your target to that list |
 | `/ln group Name toxic ninja note` | Add by name with reasons and a note |
 | `/ln remove Name` | Remove from your lists |

@@ -4,7 +4,7 @@
 ## Notes-esES: Listas negras de jugadores: mundo abierto (PvP) y mazmorras/bandas. Iconos y avisos al verlos o agruparte con ellos. /ln
 ## Notes-esMX: Listas negras de jugadores: mundo abierto (PvP) y mazmorras/bandas. Iconos y avisos al verlos o agruparte con ellos. /ln
 ## Author: AndresNG97
-## Version: 1.0.3
+## Version: 1.1.0
 ## SavedVariables: ListaNegraDB
 ## IconTexture: Interface\TargetingFrame\UI-RaidTargetingIcon_8
 ## AddonCompartmentFunc: ListaNegra_OnCompartmentClick
@@ -24,6 +24,7 @@ Domain\Entry.lua
 Domain\Blacklist.lua
 Domain\AlertPolicy.lua
 Domain\KillerGuess.lua
+Domain\History.lua
 Domain\Settings.lua
 
 # Application: use cases and the ports they need
@@ -47,6 +48,7 @@ UI\Banner.lua
 UI\Editor.lua
 UI\ListPage.lua
 UI\SettingsPage.lua
+UI\HistoryPage.lua
 UI\MainWindow.lua
 UI\Options.lua
 UI\UnitMenu.lua

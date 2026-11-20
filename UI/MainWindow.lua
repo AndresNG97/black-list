@@ -1,4 +1,4 @@
--- Main window: header, tabs (Open world, Dungeons / Raids, Alerts) and pages.
+-- Main window: header, tabs (Open world, Dungeons / Raids, Alerts, History) and pages.
 
 local _, ns = ...
 local UI = ns.UI
@@ -16,6 +16,7 @@ local function build()
 			or L["People you never want to group with again."] }
 	end
 	items[#items + 1] = { value = "avisos", text = L["Alerts"], tip = L["When and how each list alerts you."] }
+	items[#items + 1] = { value = "historial", text = L["History"], tip = L["Who killed you and who you grouped with, on a list or not."] }
 	W.tabs = UI.Tabs(W, items, function(v)
 		current = v
 		ns.refreshWindow()
@@ -29,8 +30,12 @@ local function build()
 	W.settingsPage = CreateFrame("Frame", nil, W)
 	W.settingsPage:SetPoint("TOPLEFT", 0, -86)
 	W.settingsPage:SetPoint("BOTTOMRIGHT")
+	W.historyPage = CreateFrame("Frame", nil, W)
+	W.historyPage:SetPoint("TOPLEFT", 0, -86)
+	W.historyPage:SetPoint("BOTTOMRIGHT")
 	UI.ListPage.build(W.listPage)
 	UI.SettingsPage.build(W.settingsPage)
+	UI.HistoryPage.build(W.historyPage)
 
 	W:HookScript("OnShow", function() ns.refreshWindow() end)
 	W:HookScript("OnHide", function()
@@ -49,10 +54,17 @@ function ns.refreshWindow()
 	W.tabs:Select(current)
 	W:SetSubtitle(L["%d in open world · %d in dungeons and raids"]:format(counts.pvp, counts.grupo))
 
-	local settings = current == "avisos"
-	W.listPage:SetShown(not settings)
+	local settings, history = current == "avisos", current == "historial"
+	W.listPage:SetShown(not settings and not history)
 	W.settingsPage:SetShown(settings)
-	if settings then UI.SettingsPage.refresh() else UI.ListPage.refresh(current) end
+	W.historyPage:SetShown(history)
+	if settings then
+		UI.SettingsPage.refresh()
+	elseif history then
+		UI.HistoryPage.refresh()
+	else
+		UI.ListPage.refresh(current)
+	end
 end
 
 function ns.openWindow(tab)
@@ -68,7 +80,8 @@ end
 -- Button in the minimap's add-on compartment
 function ListaNegra_OnCompartmentClick() ns.toggleWindow() end
 
--- Seeing someone changes "seen %s": batched refresh, at most once every half second
+-- Seeing someone changes "seen %s", and every group change touches the history: batched refresh,
+-- at most once every half second
 local pending = false
 local function refreshSoon()
 	if pending or not (W and W:IsShown()) or current == "avisos" then return end
@@ -83,4 +96,5 @@ ns.onLoad(function()
 	ns.listen("LISTS_CHANGED", ns.refreshWindow)
 	ns.listen("SETTINGS_CHANGED", ns.refreshWindow)
 	ns.listen("SIGHTING", refreshSoon)
+	ns.listen("HISTORY_CHANGED", function() if current == "historial" then refreshSoon() end end)
 end)
